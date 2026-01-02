@@ -1,5 +1,5 @@
 {% extends "page.html" %}
-{% block seo %}
+{% block seo_structured_data %}
   <script type="application/ld+json">
   {
     "@context": "http://schema.org",
@@ -20,16 +20,7 @@
         "position": 2,
         "item":
           {
-            "@id": "{{ g.site_url }}{{ h.url_for(controller='ckanext.dge_dashboard.controllers:DGEDashboardController', action='my_dashboard') }}",
-            "name": "{{ _('My Account') }}"
-          }
-      },
-      {
-        "@type": "ListItem",
-        "position": 3,
-        "item":
-          {
-            "@id": "{{ g.site_url }}{{ h.url_for(controller='ckanext.dge_dashboard.controllers:DGEDashboardController', action='my_dashboard') }}",
+            "@id": "{{ h.url_for('dgeDashboard.my_dashboard', qualified=True) }}",
             "name": "{{ _('Administrator Dashboard') }}"
           }
       }
@@ -40,8 +31,7 @@
 
 {% block subtitle %}{{ _('Administrator Dashboard') }}{% endblock %}
 {% block breadcrumb_content %}
- <li>{% link_for _('My Account'), controller='ckanext.dge_dashboard.controllers:DGEDashboardController', action='my_dashboard' %}</li>
- <li class="active">{{ h.nav_link(_('My Dashboard'), controller='ckanext.dge_dashboard.controllers:DGEDashboardController', action='my_dashboard') }}</li>
+ <li>{{_('My Dashboard') }}</li>
 {% endblock %}
 {% block page_title_content %}{{ _('Administrator Dashboard') }}{% endblock %}
 {% block catalog_downloads %}{% endblock %}
@@ -102,8 +92,8 @@
            data-module-no_data = "{{ _('The table contains no data') }}">
       </div>
       <div id="externalPager_dcbct" class="external-pager jsgrid-pager-container" style="text-align:center"></div>
-      {% set download_link=h.url_for(controller='ckanext.dge_dashboard.controllers:DGEDashboardController',action='adm_drupal_contents_csv')%}
-    <p><br/><a class="btn button btn-primary btn-sm pull-right" href="{{download_link}}"><i class="icon-download"></i>{{ _('Download as CSV') }}</a></p>
+      {% set download_link=h.url_for('dgeDashboard.adm_drupal_contents_csv')%}
+    <p><br/><a class="btn button btn-primary btn-sm pull-right" href="{{download_link}}"><i class="fa fa-arrow-circle-o-down"></i>{{ _('Download as CSV') }}</a></p>
     {% endif %}
   </div>
 
@@ -131,9 +121,9 @@
              data-module-no_data="{{ _('The table contains no data') }}">
         </div>
         <div id="externalPager_likes" class="external-pager jsgrid-pager-container" style="text-align:center"></div>
-        {% set download_link=h.url_for(controller='ckanext.dge_dashboard.controllers:DGEDashboardController',action='adm_drupal_contents_by_likes_csv')%}
+        {% set download_link=h.url_for('dgeDashboard.adm_drupal_contents_by_likes_csv')%}
         <p><br/><a class="btn button btn-primary btn-sm pull-right" href="{{download_link}}"><i
-                class="icon-download"></i>{{ _('Download as CSV') }}</a></p>
+                class="fa fa-arrow-circle-o-down"></i>{{ _('Download as CSV') }}</a></p>
         {% endif %}
     </div>
 
@@ -194,8 +184,8 @@
            data-module-divid = "chartAdmNumDatasetsByOrg"
            data-module-no_data = "{{ _('The chart contains no data') }}">
       </div>
-      {% set download_link=h.url_for(controller='ckanext.dge_dashboard.controllers:DGEDashboardController',action='adm_datasets_by_org_csv')%}
-      <p><br/><br/><br/><a class="btn button btn-primary btn-sm pull-right" href="{{download_link}}"><i class="icon-download"></i>{{ _('Download all publishing entities') }}</a></p>
+      {% set download_link=h.url_for('dgeDashboard.adm_datasets_by_org_csv')%}
+      <p><br/><br/><br/><a class="btn button btn-primary btn-sm pull-right" href="{{download_link}}"><i class="fa fa-arrow-circle-o-down"></i>{{ _('Download all publishing entities') }}</a></p>
     {% endif %}
   </div>
 
@@ -238,8 +228,8 @@
            data-module-no_data = "{{ _('The table contains no data') }}">
       </div>
       <div id="externalPager_dnr" class="external-pager jsgrid-pager-container" style="text-align:center"></div>
-      {% set download_link=h.url_for(controller='ckanext.dge_dashboard.controllers:DGEDashboardController',action='adm_datasets_by_res_csv')%}
-      <p><br/><a class="btn button btn-primary btn-sm pull-right" href="{{download_link}}"><i class="icon-download"></i>{{ _('Download as CSV') }}</a></p>
+      {% set download_link=h.url_for('dgeDashboard.adm_datasets_by_res_csv')%}
+      <p><br/><a class="btn button btn-primary btn-sm pull-right" href="{{download_link}}"><i class="fa fa-arrow-circle-o-down"></i>{{ _('Download as CSV') }}</a></p>
     {% endif %}
   </div>
 
@@ -267,12 +257,12 @@
              data-module-no_data="{{ _('The table contains no data') }}">
         </div>
         <div id="externalPager_top10vd" class="external-pager jsgrid-pager-container" style="text-align:center"></div>
-        {% set download_link=h.url_for(controller='ckanext.dge_dashboard.controllers:DGEDashboardController',action='adm_drupal_contents_top10_voted_datasets_csv')%}
+        {% set download_link=h.url_for('dgeDashboard.adm_drupal_contents_top10_voted_datasets_csv')%}
         <p><br/><a class="btn button btn-primary btn-sm pull-right" href="{{download_link}}"><i
-                class="icon-download"></i>{{ _('Download as CSV') }}</a></p>
+                class="fa fa-arrow-circle-o-down"></i>{{ _('Download as CSV') }}</a></p>
         {% endif %}
     </div>
-    
+
 <p><br/><br/><br/></p>
 
   {% set data_date = None %}
@@ -330,14 +320,14 @@
 
 <p><br/><br/><br/></p>
   <div>
-	<p>
-	 <strong>{{ _('Publisher organizations by administration level and update mode') }}</strong>
-	 {% if (data_date) %}<br/>{{ _('Updated date') }}: {{ data_date }}{% endif %}
-	 {% set description = _('Publisher organizations by administration level and update mode description') %}
-	 {% if description %}<br/> {{ description }}{% endif %}
-	</p>
-	{% set download_link=h.url_for(controller='ckanext.dge_dashboard.controllers:DGEDashboardController',action='adm_organizations_by_level')%}
-	<p><br/><a class="btn button btn-primary btn-sm pull-right" href="{{download_link}}"><i class="icon-download"></i>{{ _('Download as CSV') }}</a></p>
+  <p>
+   <strong>{{ _('Publisher organizations by administration level and update mode') }}</strong>
+   {% if (data_date) %}<br/>{{ _('Updated date') }}: {{ data_date }}{% endif %}
+   {% set description = _('Publisher organizations by administration level and update mode description') %}
+   {% if description %}<br/> {{ description }}{% endif %}
+  </p>
+  {% set download_link=h.url_for('dgeDashboard.adm_organizations_by_level')%}
+  <p><br/><a class="btn button btn-primary btn-sm pull-right" href="{{download_link}}"><i class="fa fa-arrow-circle-o-down"></i>{{ _('Download as CSV') }}</a></p>
   </div>
 
 <p><br/><br/><br/></p>
@@ -367,8 +357,8 @@
            data-module-no_data = "{{ _('The table contains no data') }}">
       </div>
       <div id="externalPager_ubo" class="external-pager jsgrid-pager-container" style="text-align:center"></div>
-      {% set download_link=h.url_for(controller='ckanext.dge_dashboard.controllers:DGEDashboardController',action='adm_users_by_org_csv')%}
-    <p><br/><a class="btn button btn-primary btn-sm pull-right" href="{{download_link}}"><i class="icon-download"></i>{{ _('Download as CSV') }}</a></p>
+      {% set download_link=h.url_for('dgeDashboard.adm_users_by_org_csv')%}
+    <p><br/><a class="btn button btn-primary btn-sm pull-right" href="{{download_link}}"><i class="fa fa-arrow-circle-o-down"></i>{{ _('Download as CSV') }}</a></p>
     {% endif %}
   </div>
 
@@ -470,9 +460,9 @@
 {%- block styles %}
   {{ super() }}
   <link rel="stylesheet" href="{% url_for_static "amcharts/plugins/export/export.css" %}" type="text/css" media="all" />
-  {% resource 'dge_dashboard/jsgrid/dge-jsgrid.css' %}
-  {% resource 'dge_dashboard/jsgrid/dge-jsgrid-theme.css' %}
-  {% resource 'dge_dashboard/dge-dashboard.css' %}
+  {% asset 'dge_dashboard/dge-jsgrid-css' %}
+  {% asset 'dge_dashboard/dge-jsgrid-theme-css' %}
+  {% asset 'dge_dashboard/dge-dashboard-css' %}
 {% endblock -%}
 
 
@@ -512,18 +502,18 @@
     <script src="{% url_for_static "jsgrid/i18n/jsgrid-eu.js" %}"></script>
 
 
-    {% resource "dge_dashboard/amcharts/administrator/dge_dashboard_adm_numDatasetsByAdmLevel.js" %}
-    {% resource "dge_dashboard/amstockchart/administrator/dge_dashboard_adm_numDatasetsByOrg.js" %}
-    {% resource "dge_dashboard/amcharts/administrator/dge_dashboard_adm_numPublishersByMonthYear.js" %}
-    {% resource "dge_dashboard/amcharts/administrator/dge_dashboard_adm_assignedRequests.js" %}
-    {% resource "dge_dashboard/amcharts/administrator/dge_dashboard_adm_numUsersByAdministrationLevel.js" %}
-    {% resource "dge_dashboard/amcharts/administrator/dge_dashboard_adm_numCommentsByMonthYear.js" %}
-    {% resource "dge_dashboard/amcharts/administrator/dge_dashboard_adm_numSectionVisitsByMonthYear.js" %}
-    {% resource "dge_dashboard/jsgrid/administrator/dge_dashboard_adm_numDatasetsByNumRes.js" %}
-    {% resource "dge_dashboard/jsgrid/administrator/dge_dashboard_adm_numDrupalContentsByContentType.js" %}
-	{% resource "dge_dashboard/jsgrid/administrator/dge_dashboard_adm_numUsersByOrg.js" %}
-	{% resource "dge_dashboard/amcharts/administrator/dge_dashboard_adm_numPublishersByAdministrationLevel.js" %}
-    {% resource "dge_dashboard/jsgrid/administrator/dge_dashboard_adm_drupalContentsByLikes.js" %}
-    {% resource "dge_dashboard/jsgrid/administrator/dge_dashboard_adm_drupalTop10VotedDatasets.js" %}
+    {% asset "dge_dashboard/dge-adm-numDatasetsByAdmLevel-js" %}
+    {% asset "dge_dashboard/dge-adm-numDatasetsByOrg-js" %}
+    {% asset "dge_dashboard/dge-adm-numPublishersByMonthYear-js" %}
+    {% asset "dge_dashboard/dge-adm-assignedRequests-js" %}
+    {% asset "dge_dashboard/dge-adm-numUsersByAdministrationLevel-js" %}
+    {% asset "dge_dashboard/dge-adm-numCommentsByMonthYear-js" %}
+    {% asset "dge_dashboard/dge-adm-numSectionVisitsByMonthYear-js" %}
+    {% asset "dge_dashboard/dge-adm-numDatasetsByNumRes-js" %}
+    {% asset "dge_dashboard/dge-adm-numDrupalContentsByContentType-js" %}
+    {% asset "dge_dashboard/dge-adm-numUsersByOrg-js" %}
+    {% asset "dge_dashboard/dge-adm-numPublishersByAdministrationLevel-js" %}
+    {% asset "dge_dashboard/dge-adm-drupalContentsByLikes-js" %}
+    {% asset "dge_dashboard/dge-adm-drupalTop10VotedDatasets-js" %}
 {% endblock -%}
 

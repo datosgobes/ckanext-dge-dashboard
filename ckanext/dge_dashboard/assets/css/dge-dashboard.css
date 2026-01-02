@@ -1,0 +1,97 @@
+/*
+* Copyright (C) 2025 Entidad Pública Empresarial Red.es
+*
+* This file is part of "dge-dashboard (datos.gob.es)".
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
+
+    .chartdiv
+     {
+      width: 100%;
+      height: 500px;
+      margin: auto;
+    }
+
+    .specialchartdiv
+     {
+      width: 70%;
+      height: 500px;
+      margin: auto;
+    }
+
+    .smallchartdiv
+     {
+      width: 100%;
+      height: 400px;
+    }
+    
+    .chartdiv2
+     {
+      width: 50%;
+      height: 500px;
+      float:left;
+    }
+
+	.halfwidth{
+	  width: 50%;
+      float:left;
+	}
+
+    .tablediv
+     {
+      width: 100%;
+      margin: auto;
+    }
+
+    .amcharts-pie-slice {
+      transform: scale(1);
+      transform-origin: 50% 50%;
+      transition-duration: 0.3s;
+      transition: all .3s ease-out;
+      -webkit-transition: all .3s ease-out;
+      -moz-transition: all .3s ease-out;
+      -o-transition: all .3s ease-out;
+      cursor: pointer;
+      box-shadow: 0 0 30px 0 #000;
+    }
+
+    .amcharts-pie-slice:hover {
+      transform: scale(1.1);
+      filter: url(#shadow);
+    }
+    
+    #selector {
+    font-family: Verdana;
+    background-color: #efefef;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #ccc;
+    }
+    
+    select {
+      font-size: 15px;  
+      padding: 5px;
+    }
+
+    .selector {
+      background: #eee;
+      border-bottom: 1px solid #ddd;
+      padding: 16px;
+      margin: 0;
+    }
+
+    .fa-arrow-circle-o-down{
+         margin-right: 4px;
+    }

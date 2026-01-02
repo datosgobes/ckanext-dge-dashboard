@@ -1,5 +1,5 @@
 # Spanish translations for ckanext-dge-dashboard.
-# Copyright (C) 2022 Entidad Pública Empresarial Red.es
+# Copyright (C) 2025 Entidad Pública Empresarial Red.es
 #
 # This file is part of "dge_dashboard (datos.gob.es)".
 #
@@ -224,7 +224,7 @@ msgstr ""
 "datos.gob.es por meses para las secciones: catálogo, casos de "
 "reutilización, aplicaciones, iniciativas, cuadro de mando, sector "
 "medio ambiente, sector cultura y ocio, sector educación, sector transporte, "
-"sector turismo, sector salud y bienestar, noticias, eventos, entrevistas, "
+"sector turismo, sector justicia y sociedad, sector salud y bienestar, noticias, eventos, entrevistas, "
 "boletines, blogs, disponibilidad de datos y documentación."
 
 #: ckanext/dge_dashboard/templates/my_dashboard/organization_dashboard.html:58
@@ -245,10 +245,14 @@ msgstr "Evolución de los comentarios recibidos"
 #: ckanext/dge_dashboard/templates/my_dashboard/organization_dashboard.html:225
 msgid "Evolution of my received comments description"
 msgstr ""
-"Evolución temporal de los comentarios recibidos a fin de mes "
-"diferenciando entre los referidos a los conjuntos de datos del catálogo y"
-" los comentarios recibidos en otras secciones del portal como "
-"aplicaciones, disponibilidad de datos, etc."
+"Evolución temporal de los comentarios recibidos al finalizar cada mes diferenciando entre los referidos "
+"a los conjuntos de datos del catálogo y los comentarios recibidos en otras secciones del portal."
+" Estos últimos podrán estar referidos, por un lado, a iniciativas, aplicaciones o empresas reutilizadoras, "
+"si el organismo publicador ha dado de alta alguno de estos contenidos, y por otro lado, a disponibilidad de datos, "
+"siempre y cuando tenga asignada alguna petición de datos realizada por algún usuario del portal. "
+"En todos los casos, los comentarios realizados por los usuarios generan un aviso de llegada por correo electrónico "
+"dirigido a los usuarios registrados del organismo publicador."
+
 
 #: ckanext/dge_dashboard/templates/dashboard/dashboard.html:134
 msgid "Evolution of published datasets"
@@ -913,6 +917,9 @@ msgstr "Salud y bienestar"
 msgid "turismo"
 msgstr "Turismo"
 
+msgid "justicia-sociedad"
+msgstr "Justicia y sociedad"
+
 msgid "sectores"
 msgstr "Sectores"
 
@@ -989,3 +996,72 @@ msgstr "Público"
 
 msgid "Private"
 msgstr "Privado"
+
+msgid "Jan"
+msgstr "Ene"
+
+msgid "January"
+msgstr "Enero"
+
+msgid "Feb"
+msgstr "Feb"
+
+msgid "February"
+msgstr "Febrero"
+
+msgid "Mar"
+msgstr "Mar"
+
+msgid "March"
+msgstr "Marzo"
+
+msgid "Apr"
+msgstr "Abr"
+
+msgid "April"
+msgstr "Abril"
+
+msgid "May"
+msgstr "Mayo"
+
+msgid "Jun"
+msgstr "Jun"
+
+msgid "June"
+msgstr "Junio"
+
+msgid "Jul"
+msgstr "Jul"
+
+msgid "July"
+msgstr "Julio"
+
+msgid "Aug"
+msgstr "Ago"
+
+msgid "August"
+msgstr "Agosto"
+
+msgid "Sep"
+msgstr "Sep"
+
+msgid "September"
+msgstr "Septiembre"
+
+msgid "Oct"
+msgstr "Oct"
+
+msgid "October"
+msgstr "Octubre"
+
+msgid "Nov"
+msgstr "Nov"
+
+msgid "November"
+msgstr "Noviembre"
+
+msgid "Dec"
+msgstr "Dic"
+
+msgid "December"
+msgstr "Diciembre"

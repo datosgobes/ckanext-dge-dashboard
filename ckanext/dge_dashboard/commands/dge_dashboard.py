@@ -1,6 +1,6 @@
-# Copyright (C) 2022 Entidad Pública Empresarial Red.es
+# Copyright (C) 2025 Entidad Pública Empresarial Red.es
 #
-# This file is part of "dge_dashboard (datos.gob.es)".
+# This file is part of "dge-dashboard (datos.gob.es)".
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -9,7 +9,7 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
@@ -46,26 +46,25 @@ class DgeDashboardInitDBCommand(CkanCommand):
     def command(self):
         init = datetime.now()
         s_args = (self.args if self.args else '(no args)')
-        print '[%s] - Init DgeDashboardInitDBCommand command with args: %s.' % (
-            init.strftime(DgeDashboardInitDBCommand.datetime_format), s_args)
+        print('[%s] - Init DgeDashboardInitDBCommand command with args: %s.' % (
+            init.strftime(DgeDashboardInitDBCommand.datetime_format), s_args))
         try:
             self._load_config()
             # We'll need a sysadmin user to perform most of the actions
-            # We will use the sysadmin site user (named as the site_id)
             context = {'model': model, 'session': model.Session, 'ignore_auth': True}
             self.admin_user = get_action('get_site_user')(context, {})
             model.Session.remove()
             model.Session.configure(bind=model.meta.engine)
             from ckanext.dge_dashboard.model import setup as db_setup
             db_setup()
-            print 'DB tables created'
+            print('DB tables created')
         except Exception as e:
-            print 'Exception %s' % e
+            print('Exception %s' % e)
             sys.exit(1)
         finally:
             end = datetime.now()
-            print '[%s] - End DgeDashboardInitDBCommand command with args %s. Executed command in %s milliseconds.' % (
-                end.strftime(DgeDashboardInitDBCommand.datetime_format), s_args, (end - init).total_seconds() * 1000)
+            print('[%s] - End DgeDashboardInitDBCommand command with args %s. Executed command in %s milliseconds.' % (
+                end.strftime(DgeDashboardInitDBCommand.datetime_format), s_args, (end - init).total_seconds() * 1000))
         sys.exit(0)
 
 
@@ -132,13 +131,12 @@ class DgeDashboardLoadCommand(CkanCommand):
     def command(self):
         init = datetime.now()
         s_args = (self.args if self.args else '(no args)')
-        print '[%s] - Init DgeDashboardLoadCommand command with args: %s.' % (
-            init.strftime(DgeDashboardLoadCommand.datetime_format), s_args)
+        print('[%s] - Init DgeDashboardLoadCommand command with args: %s.' % (
+            init.strftime(DgeDashboardLoadCommand.datetime_format), s_args))
         try:
             self._load_config()
 
             # We'll need a sysadmin user to perform most of the actions
-            # We will use the sysadmin site user (named as the site_id)
             context = {'model': model, 'session': model.Session, 'ignore_auth': True}
             self.admin_user = get_action('get_site_user')(context, {})
             if len(self.args) == 0 or len(self.args) > 3:
@@ -156,15 +154,15 @@ class DgeDashboardLoadCommand(CkanCommand):
             elif cmd == 'drupal_comments':
                 self.drupal_comments()
             else:
-                print 'Command %s not recognized' % cmd
+                print('Command %s not recognized' % cmd)
         except Exception as e:
-            print 'Exception %s' % (e)
-            print traceback.print_exc()
+            print('Exception %s' % (e))
+            print(traceback.print_exc())
             sys.exit(1)
         finally:
             end = datetime.now()
-            print '[%s] - End DgeDashboardLoadCommand command with args %s. Executed command in %s milliseconds.' % (
-                end.strftime(DgeDashboardLoadCommand.datetime_format), s_args, (end - init).total_seconds() * 1000)
+            print('[%s] - End DgeDashboardLoadCommand command with args %s. Executed command in %s milliseconds.' % (
+                end.strftime(DgeDashboardLoadCommand.datetime_format), s_args, (end - init).total_seconds() * 1000))
         sys.exit(0)
 
     def _load_config(self):
@@ -177,7 +175,7 @@ class DgeDashboardLoadCommand(CkanCommand):
         if len(self.args) == 3:
             dtype = self.args[1]
             if dtype != 'save' and dtype != 'print':
-                print '%s Please provide a valid type (save or print)' % (method_log_prefix)
+                print('%s Please provide a valid type (save or print)' % (method_log_prefix))
                 sys.exit()
             else:
                 if dtype == 'save':
@@ -197,7 +195,7 @@ class DgeDashboardLoadCommand(CkanCommand):
             try:
                 for_date = datetime.strptime(time_period, '%Y-%m')
             except ValueError as e:
-                print '%s Please provide a valid second param (latest|YYYY-MM|last_month)' % (method_log_prefix)
+                print('%s Please provide a valid second param (latest|YYYY-MM|last_month)' % (method_log_prefix))
                 sys.exit(1)
 
             if for_date:
@@ -209,7 +207,7 @@ class DgeDashboardLoadCommand(CkanCommand):
                 calculation_date = datetime(year, month + 1, 1, 0, 0, 0)
             return save, time_period, calculation_date
         else:
-            print '%s Please provide valid params {print|save} {latest|YYYY-MM|last_month}' % (method_log_prefix)
+            print('%s Please provide valid params {print|save} {latest|YYYY-MM|last_month}' % (method_log_prefix))
             sys.exit(1)
 
     def _set_context(self):
@@ -222,52 +220,52 @@ class DgeDashboardLoadCommand(CkanCommand):
 
     def published_datasets(self, num_resources=False):
         method_log_prefix = '[%s][published_datasets]' % (type(self).__name__)
-        print '%s Init method.' % (method_log_prefix)
+        print('%s Init method.' % (method_log_prefix))
         context = self._set_context()
         save, time_period, calculation_date = self._validate_args(method_log_prefix)
         get_action('dge_dashboard_update_published_datasets')(context, {'date': str(calculation_date),
                                                                         'import_date': time_period,
                                                                         'num_resources': num_resources, 'save': save})
         if save:
-            print 'Updated dge_dashboard_published_datasets table with data of %s' % time_period
-        print '%s End method.' % (method_log_prefix)
+            print('Updated dge_dashboard_published_datasets table with data of %s' % time_period)
+        print('%s End method.' % (method_log_prefix))
         sys.exit(0)
 
     def publishers(self):
         method_log_prefix = '[%s][publishers]' % type(self).__name__
-        print '%s Init method.' % (method_log_prefix)
+        print('%s Init method.' % (method_log_prefix))
         context = self._set_context()
         save, time_period, calculation_date = self._validate_args(method_log_prefix)
         get_action('dge_dashboard_update_publishers')(context,
                                                       {'date': str(calculation_date), 'import_date': time_period,
                                                        'save': save})
         if save:
-            print 'Updated dge_dashboard_publishers table with data of %s' % time_period
+            print('Updated dge_dashboard_publishers table with data of %s' % time_period)
 
-        print '%s End method' % (method_log_prefix)
+        print('%s End method' % (method_log_prefix))
 
     def drupal_published_contents(self, num_resources=False):
         method_log_prefix = '[%s][drupal_published_contents]' % type(self).__name__
-        print '%s Init method.' % (method_log_prefix)
+        print('%s Init method.' % (method_log_prefix))
         context = self._set_context()
         save, time_period, calculation_date = self._validate_args(method_log_prefix)
         get_action('dge_dashboard_update_drupal_published_contents')(context,
                                                                      {'date': calculation_date.strftime("%Y/%m/%d"),
                                                                       'import_date': time_period, 'save': save})
         if save:
-            print 'Updated dge_dashboard_update_drupal_published_contents table with data of %s' % time_period
-        print '%s End method' % (method_log_prefix)
+            print('Updated dge_dashboard_update_drupal_published_contents table with data of %s' % time_period)
+        print('%s End method' % (method_log_prefix))
 
     def drupal_comments(self):
         method_log_prefix = '[%s][drupal_comments]' % type(self).__name__
-        print '%s Init method.' % (method_log_prefix)
+        print('%s Init method.' % (method_log_prefix))
         context = self._set_context()
         save, time_period, calculation_date = self._validate_args(method_log_prefix)
         get_action('dge_dashboard_update_drupal_comments')(context, {'date': calculation_date.strftime("%Y/%m/%d"),
                                                                      'import_date': time_period, 'save': save})
         if save:
-            print 'Updated dge_dashboard_drupal_contents table with data of %s' % time_period
-        print '%s End method' % (method_log_prefix)
+            print('Updated dge_dashboard_drupal_contents table with data of %s' % time_period)
+        print('%s End method' % (method_log_prefix))
 
 
 class DgeDashboardJsonCommand(CkanCommand):
@@ -394,12 +392,11 @@ class DgeDashboardJsonCommand(CkanCommand):
     def command(self):
         init = datetime.now()
         s_args = (self.args if self.args else '(no args)')
-        print '[%s] - Init DgeDashboardJsonCommand command with args: %s.' % (
-            init.strftime(DgeDashboardJsonCommand.datetime_format), s_args)
+        print('[%s] - Init DgeDashboardJsonCommand command with args: %s.' % (
+            init.strftime(DgeDashboardJsonCommand.datetime_format), s_args))
         try:
             self._load_config()
             # We'll need a sysadmin user to perform most of the actions
-            # We will use the sysadmin site user (named as the site_id)
             context = {'model': model, 'session': model.Session, 'ignore_auth': True}
             self.admin_user = get_action('get_site_user')(context, {})
             if len(self.args) == 0 or len(self.args) > 4:
@@ -439,14 +436,14 @@ class DgeDashboardJsonCommand(CkanCommand):
             elif cmd == 'top10_voted_dataset':
                 self.current_drupal_top10_voted_datasets()
             else:
-                print 'Command %s not recognized' % cmd
+                print('Command %s not recognized' % cmd)
         except Exception as e:
-            print 'Exception: %s \n%s\n' % (e, traceback.format_exc())
+            print('Exception: %s \n%s\n' % (e, traceback.format_exc()))
             sys.exit(1)
         finally:
             end = datetime.now()
-            print '[%s] - End DgeDashboardJsonCommand command with args %s. Executed command in %s milliseconds.' % (
-                end.strftime(DgeDashboardJsonCommand.datetime_format), s_args, (end - init).total_seconds() * 1000)
+            print('[%s] - End DgeDashboardJsonCommand command with args %s. Executed command in %s milliseconds.' % (
+                end.strftime(DgeDashboardJsonCommand.datetime_format), s_args, (end - init).total_seconds() * 1000))
         sys.exit(0)
 
     def _load_config(self):
@@ -454,19 +451,19 @@ class DgeDashboardJsonCommand(CkanCommand):
 
     def _validate_destination_filename(self, destination, filename, is_prefix=False, method_log_prefix=''):
         if destination is None or len(destination) == 0 or len(destination.strip(' \t\n\r')) == 0:
-            print '%s Please provide a destination' % (method_log_prefix)
+            print('%s Please provide a destination' % (method_log_prefix))
             sys.exit(1)
         else:
             destination = destination.strip(' \t\n\r')
         name = 'destination' if is_prefix else 'prefix'
         if filename is None or len(filename) == 0 or len(filename.strip(' \t\n\r')) == 0:
-            print '%s Please provide a %s' % (method_log_prefix, name)
+            print('%s Please provide a %s' % (method_log_prefix, name))
             sys.exit(1)
         else:
             filename = filename.strip(' \t\n\r')
             pattern = re.compile(self.FILENAME_REGEX)
             if not pattern.match(filename):
-                print '%s Please provide a valid %s. Regular expression: %s' % (method_log_prefix, name, filename_regex)
+                print('%s Please provide a valid %s. Regular expression: %s' % (method_log_prefix, name, filename_regex))
         return destination, filename
 
     def _set_context(self):
@@ -479,7 +476,7 @@ class DgeDashboardJsonCommand(CkanCommand):
 
     def published_datasets(self):
         method_log_prefix = '[%s][published_datasets]' % type(self).__name__
-        print '%s Init method.' % (method_log_prefix)
+        print('%s Init method.' % (method_log_prefix))
         context = self._set_context()
         types = self.PUBLISHED_DATASETS_TYPES
         if len(self.args) == 4:
@@ -487,24 +484,24 @@ class DgeDashboardJsonCommand(CkanCommand):
             destination = self.args[2]
             prefix = self.args[3]
             if dtype not in types:
-                print '%s Please provide a valid type %s' % (method_log_prefix, types)
+                print('%s Please provide a valid type %s' % (method_log_prefix, types))
                 sys.exit()
             destination, prefix = self._validate_destination_filename(destination, prefix, True, method_log_prefix)
             outfilename = get_action('dge_dashboard_json_published_datasets')(context, {'what': dtype,
                                                                                         'destination': destination,
                                                                                         'prefix': prefix})
             if outfilename:
-                print 'Writed json with %s data in %s' % (dtype, outfilename)
+                print('Writed json with %s data in %s' % (dtype, outfilename))
             else:
-                print 'No file was created'
+                print('No file was created')
         else:
-            print '%s Please provide valid params: %s {destination} {prefix}' % (method_log_prefix, types)
+            print('%s Please provide valid params: %s {destination} {prefix}' % (method_log_prefix, types))
             sys.exit(1)
-        print '%s End method' % (method_log_prefix)
+        print('%s End method' % (method_log_prefix))
 
     def current_published_datasets_by_administration_level(self):
         method_log_prefix = '[%s][current_published_datasets_by_administration_level]' % type(self).__name__
-        print '%s Init method.' % (method_log_prefix)
+        print('%s Init method.' % (method_log_prefix))
         context = self._set_context()
         if len(self.args) == 3:
             destination = self.args[1]
@@ -513,17 +510,17 @@ class DgeDashboardJsonCommand(CkanCommand):
             outfilename = get_action('dge_dashboard_json_current_published_datasets_by_administration_level')(context, {
                 'destination': destination, 'filename': filename})
             if outfilename:
-                print 'Writed json in %s' % (outfilename)
+                print('Writed json in %s' % (outfilename))
             else:
-                print 'No file was created'
+                print('No file was created')
         else:
-            print '%s Please provide valid params: {destination} {filename}' % (method_log_prefix)
+            print('%s Please provide valid params: {destination} {filename}' % (method_log_prefix))
             sys.exit(1)
-        print '%s End method' % (method_log_prefix)
+        print('%s End method' % (method_log_prefix))
 
     def current_distribution_format(self):
         method_log_prefix = '[%s][current_distribution_format]' % type(self).__name__
-        print '%s Init method.' % (method_log_prefix)
+        print('%s Init method.' % (method_log_prefix))
         context = self._set_context()
         types = self.DISTRIBUTION_FORMAT_TYPES
         if len(self.args) == 4:
@@ -531,24 +528,24 @@ class DgeDashboardJsonCommand(CkanCommand):
             destination = self.args[2]
             prefix = self.args[3]
             if dtype not in types:
-                print '%s Please provide a valid type %s' % (method_log_prefix, types)
+                print('%s Please provide a valid type %s' % (method_log_prefix, types))
                 sys.exit()
             destination, prefix = self._validate_destination_filename(destination, prefix, True, method_log_prefix)
             outfilename = get_action('dge_dashboard_json_current_distribution_format')(context, {'what': dtype,
                                                                                                  'destination': destination,
                                                                                                  'prefix': prefix})
             if outfilename:
-                print 'Writed json with %s data in %s' % (dtype, outfilename)
+                print('Writed json with %s data in %s' % (dtype, outfilename))
             else:
-                print 'No file was created'
+                print('No file was created')
         else:
-            print '%s Please provide valid params: %s, {destination} {prefix}' % (method_log_prefix)
+            print('%s Please provide valid params: %s, {destination} {prefix}' % (method_log_prefix))
             sys.exit(1)
-        print '%s End method' % (method_log_prefix)
+        print('%s End method' % (method_log_prefix))
 
     def current_published_datasets_by_category(self):
         method_log_prefix = '[%s][current_published_datasets_by_category]' % type(self).__name__
-        print '%s Init method.' % (method_log_prefix)
+        print('%s Init method.' % (method_log_prefix))
         context = self._set_context()
         if len(self.args) == 3:
             destination = self.args[1]
@@ -557,17 +554,17 @@ class DgeDashboardJsonCommand(CkanCommand):
             outfilename = get_action('dge_dashboard_json_current_published_datasets_by_category')(context, {
                 'destination': destination, 'filename': filename})
             if outfilename:
-                print 'Writed json in %s' % (outfilename)
+                print('Writed json in %s' % (outfilename))
             else:
-                print 'No file was created'
+                print('No file was created')
         else:
-            print '%s Please provide valid params: {destination} {filename}' % (method_log_prefix)
+            print('%s Please provide valid params: {destination} {filename}' % (method_log_prefix))
             sys.exit(1)
-        print '%s End method' % (method_log_prefix)
+        print('%s End method' % (method_log_prefix))
 
     def publishers(self):
         method_log_prefix = '[%s][publishers]' % type(self).__name__
-        print '%s Init method.' % (method_log_prefix)
+        print('%s Init method.' % (method_log_prefix))
         context = self._set_context()
         if len(self.args) == 3:
             destination = self.args[1]
@@ -576,17 +573,17 @@ class DgeDashboardJsonCommand(CkanCommand):
             outfilename = get_action('dge_dashboard_json_publishers')(context, {'destination': destination,
                                                                                 'filename': filename})
             if outfilename:
-                print 'Writed json in %s' % (outfilename)
+                print('Writed json in %s' % (outfilename))
             else:
-                print 'No file was created'
+                print('No file was created')
         else:
-            print '%s Please provide valid params: {destination} {filename}' % (method_log_prefix)
+            print('%s Please provide valid params: {destination} {filename}' % (method_log_prefix))
             sys.exit(1)
-        print '%s End method' % (method_log_prefix)
+        print('%s End method' % (method_log_prefix))
 
     def current_publishers_by_administration_level(self):
         method_log_prefix = '[%s][current_publishers_by_administration_level]' % type(self).__name__
-        print '%s Init method.' % (method_log_prefix)
+        print('%s Init method.' % (method_log_prefix))
         context = self._set_context()
         if len(self.args) == 3:
             destination = self.args[1]
@@ -595,17 +592,17 @@ class DgeDashboardJsonCommand(CkanCommand):
             outfilename = get_action('dge_dashboard_json_current_publishers_by_administration_level')(context, {
                 'destination': destination, 'filename': filename})
             if outfilename:
-                print 'Writed json in %s' % (outfilename)
+                print('Writed json in %s' % (outfilename))
             else:
-                print 'No file was created'
+                print('No file was created')
         else:
-            print '%s Please provide valid params: {destination} {filename}' % (method_log_prefix)
+            print('%s Please provide valid params: {destination} {filename}' % (method_log_prefix))
             sys.exit(1)
-        print '%s End method' % (method_log_prefix)
+        print('%s End method' % (method_log_prefix))
 
     def drupal_published_contents(self):
         method_log_prefix = '[%s][drupal_published_contents]' % type(self).__name__
-        print '%s Init method.' % (method_log_prefix)
+        print('%s Init method.' % (method_log_prefix))
         context = self._set_context()
         types = self.DRUPAL_PUBLISHED_CONTENTS
         if len(self.args) == 4:
@@ -613,24 +610,24 @@ class DgeDashboardJsonCommand(CkanCommand):
             destination = self.args[2]
             prefix = self.args[3]
             if dtype not in types:
-                print '%s Please provide a valid type %s' % (method_log_prefix, types)
+                print('%s Please provide a valid type %s' % (method_log_prefix, types))
                 sys.exit()
             destination, prefix = self._validate_destination_filename(destination, prefix, True, method_log_prefix)
             outfilename = get_action('dge_dashboard_json_drupal_published_contents')(context, {'what': dtype,
                                                                                                'destination': destination,
                                                                                                'prefix': prefix})
             if outfilename:
-                print 'Writed json with %s data in %s' % (dtype, outfilename)
+                print('Writed json with %s data in %s' % (dtype, outfilename))
             else:
-                print 'No file was created'
+                print('No file was created')
         else:
-            print '%s Please provide valid params: %s, {destination} {prefix}' % (method_log_prefix, types)
+            print('%s Please provide valid params: %s, {destination} {prefix}' % (method_log_prefix, types))
             sys.exit(1)
-        print '%s End method' % (method_log_prefix)
+        print('%s End method' % (method_log_prefix))
 
     def current_drupal_published_contents(self):
         method_log_prefix = '[%s][current_drupal_published_contents]' % type(self).__name__
-        print '%s Init method.' % (method_log_prefix)
+        print('%s Init method.' % (method_log_prefix))
         context = self._set_context()
         if len(self.args) == 3:
             destination = self.args[1]
@@ -639,17 +636,17 @@ class DgeDashboardJsonCommand(CkanCommand):
             outfilename = get_action('dge_dashboard_json_current_drupal_published_contents')(context, {
                 'destination': destination, 'filename': filename})
             if outfilename:
-                print 'Writed json in %s' % (outfilename)
+                print('Writed json in %s' % (outfilename))
             else:
-                print 'No file was created'
+                print('No file was created')
         else:
-            print '%s Please provide valid params: {destination} {filename}' % (method_log_prefix)
+            print('%s Please provide valid params: {destination} {filename}' % (method_log_prefix))
             sys.exit(1)
-        print '%s End method' % (method_log_prefix)
+        print('%s End method' % (method_log_prefix))
 
     def current_drupal_content_by_likes(self):
         method_log_prefix = '[%s][current_drupal_content_by_likes]' % type(self).__name__
-        print '%s Init method.' % method_log_prefix
+        print('%s Init method.' % method_log_prefix)
         context = self._set_context()
         if len(self.args) == 3:
             destination = self.args[1]
@@ -658,17 +655,17 @@ class DgeDashboardJsonCommand(CkanCommand):
             out_filename = get_action('dge_dashboard_json_drupal_content_by_likes')(context, {
                 'destination': destination, 'filename': filename})
             if out_filename:
-                print 'Written json in %s' % out_filename
+                print('Written json in %s' % out_filename)
             else:
-                print 'No file was created'
+                print('No file was created')
         else:
-            print '%s Please provide valid params: {destination} {filename}' % method_log_prefix
+            print('%s Please provide valid params: {destination} {filename}' % method_log_prefix)
             sys.exit(1)
-        print '%s End method' % method_log_prefix
+        print('%s End method' % method_log_prefix)
 
     def current_drupal_top10_voted_datasets(self):
         method_log_prefix = '[%s][current_drupal_top10_voted_datasets]' % type(self).__name__
-        print '%s Init method.' % method_log_prefix
+        print('%s Init method.' % method_log_prefix)
         context = self._set_context()
         if len(self.args) == 3:
             destination = self.args[1]
@@ -677,17 +674,17 @@ class DgeDashboardJsonCommand(CkanCommand):
             out_filename = get_action('dge_dashboard_json_drupal_top10_voted_datasets')(context, {
                 'destination': destination, 'filename': filename})
             if out_filename:
-                print 'Written json in %s' % out_filename
+                print('Written json in %s' % out_filename)
             else:
-                print 'No file was created'
+                print('No file was created')
         else:
-            print '%s Please provide valid params: {destination} {filename}' % method_log_prefix
+            print('%s Please provide valid params: {destination} {filename}' % method_log_prefix)
             sys.exit(1)
-        print '%s End method' % method_log_prefix
+        print('%s End method' % method_log_prefix)
 
     def current_users(self):
         method_log_prefix = '[%s][current_users]' % type(self).__name__
-        print '%s Init method.' % (method_log_prefix)
+        print('%s Init method.' % (method_log_prefix))
         context = self._set_context()
         types = self.USERS_TYPES
         if len(self.args) == 4:
@@ -695,24 +692,24 @@ class DgeDashboardJsonCommand(CkanCommand):
             destination = self.args[2]
             prefix = self.args[3]
             if dtype not in types:
-                print '%s Please provide a valid type %s' % (method_log_prefix, types)
+                print('%s Please provide a valid type %s' % (method_log_prefix, types))
                 sys.exit()
             destination, prefix = self._validate_destination_filename(destination, prefix, True, method_log_prefix)
             outfilename = get_action('dge_dashboard_json_current_users')(context,
                                                                          {'what': dtype, 'destination': destination,
                                                                           'prefix': prefix})
             if outfilename:
-                print 'Writed json with %s data in %s' % (dtype, outfilename)
+                print('Writed json with %s data in %s' % (dtype, outfilename))
             else:
-                print 'No file was created'
+                print('No file was created')
         else:
-            print '%s Please provide valid params: %s, {destination} {prefix}' % (method_log_prefix, types)
+            print('%s Please provide valid params: %s, {destination} {prefix}' % (method_log_prefix, types))
             sys.exit(1)
-        print '%s End method' % (method_log_prefix)
+        print('%s End method' % (method_log_prefix))
 
     def current_assigned_request_by_state(self):
         method_log_prefix = '[%s][current_assigned_request_by_state]' % type(self).__name__
-        print '%s Init method.' % (method_log_prefix)
+        print('%s Init method.' % (method_log_prefix))
         context = self._set_context()
         types = self.REQUEST_TYPES
         if len(self.args) == 4:
@@ -720,24 +717,24 @@ class DgeDashboardJsonCommand(CkanCommand):
             destination = self.args[2]
             prefix = self.args[3]
             if dtype not in types:
-                print '%s Please provide a valid type %s' % (method_log_prefix, types)
+                print('%s Please provide a valid type %s' % (method_log_prefix, types))
                 sys.exit()
             destination, prefix = self._validate_destination_filename(destination, prefix, True, method_log_prefix)
             outfilename = get_action('dge_dashboard_json_current_assigned_request_by_state')(context, {'what': dtype,
                                                                                                        'destination': destination,
                                                                                                        'prefix': prefix})
             if outfilename:
-                print 'Writed json with %s data in %s' % (dtype, outfilename)
+                print('Writed json with %s data in %s' % (dtype, outfilename))
             else:
-                print 'No file was created'
+                print('No file was created')
         else:
-            print '%s Please provide valid params: %s, {destination} {prefix}' % (method_log_prefix, types)
+            print('%s Please provide valid params: %s, {destination} {prefix}' % (method_log_prefix, types))
             sys.exit(1)
-        print '%s End method' % (method_log_prefix)
+        print('%s End method' % (method_log_prefix))
 
     def visits(self):
         method_log_prefix = '[%s][visits]' % type(self).__name__
-        print '%s Init method.' % (method_log_prefix)
+        print('%s Init method.' % (method_log_prefix))
         context = self._set_context()
         types = self.VISIT_TYPES
         if len(self.args) == 4:
@@ -745,23 +742,23 @@ class DgeDashboardJsonCommand(CkanCommand):
             destination = self.args[2]
             prefix = self.args[3]
             if dtype not in types:
-                print '%s Please provide a valid type %s' % (method_log_prefix, types)
+                print('%s Please provide a valid type %s' % (method_log_prefix, types))
                 sys.exit()
             destination, prefix = self._validate_destination_filename(destination, prefix, True, method_log_prefix)
             outfilename = get_action('dge_dashboard_json_visits')(context, {'what': dtype, 'destination': destination,
                                                                             'prefix': prefix})
             if outfilename:
-                print 'Writed json with %s data in %s' % (dtype, outfilename)
+                print('Writed json with %s data in %s' % (dtype, outfilename))
             else:
-                print 'No file was created'
+                print('No file was created')
         else:
-            print '%s Please provide valid params: %s, {destination} {prefix}' % (method_log_prefix, types)
+            print('%s Please provide valid params: %s, {destination} {prefix}' % (method_log_prefix, types))
             sys.exit(1)
-        print '%s End method' % (method_log_prefix)
+        print('%s End method' % (method_log_prefix))
 
     def visited_datasets(self):
         method_log_prefix = '[%s][visited_datasets]' % type(self).__name__
-        print '%s Init method.' % (method_log_prefix)
+        print('%s Init method.' % (method_log_prefix))
         context = self._set_context()
         types = self.VISITED_DATASET_TYPES
         if len(self.args) == 4:
@@ -769,31 +766,31 @@ class DgeDashboardJsonCommand(CkanCommand):
             destination = self.args[2]
             prefix = self.args[3]
             if dtype not in types:
-                print '%s Please provide a valid type %s' % (method_log_prefix, types)
+                print('%s Please provide a valid type %s' % (method_log_prefix, types))
                 sys.exit()
             destination, prefix = self._validate_destination_filename(destination, prefix, True, method_log_prefix)
             outfilename = get_action('dge_dashboard_json_visited_datasets')(context,
                                                                             {'what': dtype, 'destination': destination,
                                                                              'prefix': prefix})
             if outfilename:
-                print 'Writed json with %s data in %s' % (dtype, outfilename)
+                print('Writed json with %s data in %s' % (dtype, outfilename))
             else:
-                print 'No file was created'
+                print('No file was created')
 
-            print 'Writing csv files...'
+            print('Writing csv files...')
             get_action('dge_dashboard_csv_visited_datasets')(context,
                                                                 {'what': dtype, 'destination': destination,
                                                                  'prefix': prefix})
-            print 'Writed csv files'
+            print('Writed csv files')
 
         else:
-            print '%s Please provide valid params: %s, {destination} {prefix}' % (method_log_prefix, types)
+            print('%s Please provide valid params: %s, {destination} {prefix}' % (method_log_prefix, types))
             sys.exit(1)
-        print '%s End method' % (method_log_prefix)
+        print('%s End method' % (method_log_prefix))
 
     def organization_by_administration_level(self):
         method_log_prefix = '[%s][organization_by_administration_level]' % type(self).__name__
-        print '%s Init method.' % (method_log_prefix)
+        print('%s Init method.' % (method_log_prefix))
         context = self._set_context()
         if len(self.args) == 3:
             destination = self.args[1]
@@ -801,18 +798,18 @@ class DgeDashboardJsonCommand(CkanCommand):
             destination, filename = self._validate_destination_filename(destination, filename, False, method_log_prefix)
             outfilename = get_action('dge_dashboard_json_organization_by_administration_level')(context,{'destination': destination, 'filename': filename})
             if outfilename:
-                print 'Writed json in %s' % (outfilename)
+                print('Writed json in %s' % (outfilename))
             else:
-                print 'No file was created'
+                print('No file was created')
         else:
-            print '%s Please provide valid params: {destination} {filename}' % (method_log_prefix)
+            print('%s Please provide valid params: {destination} {filename}' % (method_log_prefix))
             sys.exit(1)
-        print '%s End method' % (method_log_prefix)
+        print('%s End method' % (method_log_prefix))
 
 
     def organization_name(self):
         method_log_prefix = '[%s][organization_name]' % type(self).__name__
-        print '%s Init method.' % (method_log_prefix)
+        print('%s Init method.' % (method_log_prefix))
         context = self._set_context()
         if len(self.args) == 3:
             destination = self.args[1]
@@ -820,13 +817,13 @@ class DgeDashboardJsonCommand(CkanCommand):
             destination, filename = self._validate_destination_filename(destination, filename, False, method_log_prefix)
             outfilename = get_action('dge_dashboard_json_organization_name')(context,{'destination': destination, 'filename': filename})
             if outfilename:
-                print 'Writed json in %s' % (outfilename)
+                print('Writed json in %s' % (outfilename))
             else:
-                print 'No file was created'
+                print('No file was created')
         else:
-            print '%s Please provide valid params: {destination} {filename}' % (method_log_prefix)
+            print('%s Please provide valid params: {destination} {filename}' % (method_log_prefix))
             sys.exit(1)
-        print '%s End method' % (method_log_prefix)
+        print('%s End method' % (method_log_prefix))
         
 
 class DgeDashboardCsvCommand(CkanCommand):
@@ -856,12 +853,11 @@ class DgeDashboardCsvCommand(CkanCommand):
     def command(self):
         init = datetime.now()
         s_args = (self.args if self.args else '(no args)')
-        print '[%s] - Init DgeDashboardCsvCommand command with args: %s.' % (
-            init.strftime(DgeDashboardCsvCommand.datetime_format), s_args)
+        print('[%s] - Init DgeDashboardCsvCommand command with args: %s.' % (
+            init.strftime(DgeDashboardCsvCommand.datetime_format), s_args))
         try:
             self._load_config()
             # We'll need a sysadmin user to perform most of the actions
-            # We will use the sysadmin site user (named as the site_id)
             context = {'model': model, 'session': model.Session, 'ignore_auth': True}
             self.admin_user = get_action('get_site_user')(context, {})
             if len(self.args) == 0 or len(self.args) > 5:
@@ -871,14 +867,14 @@ class DgeDashboardCsvCommand(CkanCommand):
             if cmd == 'published_datasets_by_root_org':
                 self.published_datasets_by_root_org()
             else:
-                print 'Command %s not recognized' % cmd
+                print('Command %s not recognized' % cmd)
         except Exception as e:
-            print 'Exception %s' % e
+            print('Exception %s' % e)
             sys.exit(1)
         finally:
             end = datetime.now()
-            print '[%s] - End DgeDashboardCsvCommand command with args %s. Executed command in %s milliseconds.' % (
-                end.strftime(DgeDashboardCsvCommand.datetime_format), s_args, (end - init).total_seconds() * 1000)
+            print('[%s] - End DgeDashboardCsvCommand command with args %s. Executed command in %s milliseconds.' % (
+                end.strftime(DgeDashboardCsvCommand.datetime_format), s_args, (end - init).total_seconds() * 1000))
         sys.exit(0)
 
     def _load_config(self):
@@ -900,7 +896,7 @@ class DgeDashboardCsvCommand(CkanCommand):
             try:
                 for_date = datetime.strptime(time_period, '%Y-%m')
             except ValueError as e:
-                print '%s Please provide a valid second param (latest|YYYY-MM|last_month)' % (method_log_prefix)
+                print('%s Please provide a valid second param (latest|YYYY-MM|last_month)' % (method_log_prefix))
                 sys.exit(1)
 
             if for_date:
@@ -912,24 +908,24 @@ class DgeDashboardCsvCommand(CkanCommand):
                 calculation_date = datetime(year, month + 1, 1, 0, 0, 0)
             return time_period, calculation_date
         else:
-            print '%s Please provide valid params {print|save} {latest|YYYY-MM|last_month}' % (method_log_prefix)
+            print('%s Please provide valid params {print|save} {latest|YYYY-MM|last_month}' % (method_log_prefix))
             sys.exit(1)
 
     def _validate_destination_filename(self, destination, filename, is_prefix=False, method_log_prefix=''):
         if destination is None or len(destination) == 0 or len(destination.strip(' \t\n\r')) == 0:
-            print '%s Please provide a destination' % (method_log_prefix)
+            print('%s Please provide a destination' % (method_log_prefix))
             sys.exit(1)
         else:
             destination = destination.strip(' \t\n\r')
         name = 'destination' if is_prefix else 'prefix'
         if filename is None or len(filename) == 0 or len(filename.strip(' \t\n\r')) == 0:
-            print '%s Please provide a %s' % (method_log_prefix, name)
+            print('%s Please provide a %s' % (method_log_prefix, name))
             sys.exit(1)
         else:
             filename = filename.strip(' \t\n\r')
             pattern = re.compile(DgeDashboardJsonCommand.FILENAME_REGEX)
             if not pattern.match(filename):
-                print '%s Please provide a valid %s. Regular expression: %s' % (method_log_prefix, name, filename_regex)
+                print('%s Please provide a valid %s. Regular expression: %s' % (method_log_prefix, name, filename_regex))
         return destination, filename
 
     def _set_context(self):
@@ -942,7 +938,7 @@ class DgeDashboardCsvCommand(CkanCommand):
 
     def published_datasets_by_root_org(self):
         method_log_prefix = '[%s][published_datasets_by_root_org]' % type(self).__name__
-        print '%s Init method.' % (method_log_prefix)
+        print('%s Init method.' % (method_log_prefix))
         context = self._set_context()
         save = False
         destination = None
@@ -955,7 +951,7 @@ class DgeDashboardCsvCommand(CkanCommand):
             if len(self.args) >= 5:
                 filename = self.args[4]
             if dtype != 'save' and dtype != 'print':
-                print '%s Please provide a valid type (save or print)' % (method_log_prefix)
+                print('%s Please provide a valid type (save or print)' % (method_log_prefix))
                 sys.exit()
             else:
                 if dtype == 'save':
@@ -964,8 +960,8 @@ class DgeDashboardCsvCommand(CkanCommand):
             if save:
                 destination, filename = self._validate_destination_filename(destination, filename, False,
                                                                             method_log_prefix)
-            print destination
-            print filename
+            print(destination)
+            print(filename)
             outfilename = get_action('dge_dashboard_csv_published_datasets_by_root_org')(context,
                                                                                          {'date': str(calculation_date),
                                                                                           'import_date': time_period,
@@ -973,11 +969,11 @@ class DgeDashboardCsvCommand(CkanCommand):
                                                                                           'destination': destination,
                                                                                           'filename': filename})
             if outfilename:
-                print 'Writed json with %s data in %s' % (dtype, outfilename)
+                print('Writed json with %s data in %s' % (dtype, outfilename))
             else:
-                print 'No file was created'
+                print('No file was created')
         else:
-            print '%s Please provide valid params: {save|print} {YYYY-MM|last_month|latest} {destination} {filename} {destination} {prefix}' % (
-                method_log_prefix)
+            print('%s Please provide valid params: {save|print} {YYYY-MM|last_month|latest} {destination} {filename} {destination} {prefix}' % (
+                method_log_prefix))
             sys.exit(1)
-        print '%s End method' % (method_log_prefix)
+        print('%s End method' % (method_log_prefix))

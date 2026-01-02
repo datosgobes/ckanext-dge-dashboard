@@ -2,5 +2,5 @@
 
 
 {% block dashboard %}
-  <li class="leaf"><a href="{{ h.url_for(controller='ckanext.dge_dashboard.controllers:DGEDashboardController', action='dashboard') }}">{{ _('Dashboard') }}</a></li>
+  <li class="leaf"><a href="{{ h.url_for('dgeDashboard.dashboard') }}">{{ _('Dashboard') }}</a></li>
 {% endblock %}

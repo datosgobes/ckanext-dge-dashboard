@@ -1,0 +1,176 @@
+dge-jsgrid-theme-css:
+  output: ckanext-dge-dashboard/%(version)s-dge-jsgrid-theme.css
+  contents:
+    - css/jsgrid/dge-jsgrid-theme.css
+
+dge-jsgrid-css:
+  output: ckanext-dge-dashboard/%(version)s-dge-jsgrid.css
+  contents:
+    - css/jsgrid/dge-jsgrid.css
+
+dge-dashboard-css:
+  output: ckanext-dge-dashboard/%(version)s-dge-dashboard.css
+  contents:
+    - css/dge-dashboard.css
+
+dge-adm-assignedRequests-js:
+  filter: rjsmin
+  output: ckanext-dge-dashboard/%(version)s-dge_dashboard_adm_assignedRequests.js
+  contents:
+    - js/amcharts/administrator/dge_dashboard_adm_assignedRequests.js
+
+dge-adm-numCommentsByMonthYear-js:
+  filter: rjsmin
+  output: ckanext-dge-dashboard/%(version)s-dge_dashboard_adm_numCommentsByMonthYear.js
+  contents:
+    - js/amcharts/administrator/dge_dashboard_adm_numCommentsByMonthYear.js
+
+dge-adm-numDatasetsByAdmLevel-js:
+  filter: rjsmin
+  output: ckanext-dge-dashboard/%(version)s-dge_dashboard_adm_numDatasetsByAdmLevel.js
+  contents:
+    - js/amcharts/administrator/dge_dashboard_adm_numDatasetsByAdmLevel.js
+
+dge-adm-numPublishersByAdministrationLevel-js:
+  filter: rjsmin
+  output: ckanext-dge-dashboard/%(version)s-dge_dashboard_adm_numPublishersByAdministrationLevel.js
+  contents:
+    - js/amcharts/administrator/dge_dashboard_adm_numPublishersByAdministrationLevel.js
+
+dge-adm-numPublishersByMonthYear-js:
+  filter: rjsmin
+  output: ckanext-dge-dashboard/%(version)s-dge_dashboard_adm_numPublishersByMonthYear.js
+  contents:
+    - js/amcharts/administrator/dge_dashboard_adm_numPublishersByMonthYear.js
+
+dge-adm-numSectionVisitsByMonthYear-js:
+  filter: rjsmin
+  output: ckanext-dge-dashboard/%(version)s-dge_dashboard_adm_numSectionVisitsByMonthYear.js
+  contents:
+    - js/amcharts/administrator/dge_dashboard_adm_numSectionVisitsByMonthYear.js
+
+dge-adm-numUsersByAdministrationLevel-js:
+  filter: rjsmin
+  output: ckanext-dge-dashboard/%(version)s-dge_dashboard_adm_numUsersByAdministrationLevel.js
+  contents:
+    - js/amcharts/administrator/dge_dashboard_adm_numUsersByAdministrationLevel.js
+
+dge-org-assignedRequests-js:
+  filter: rjsmin
+  output: ckanext-dge-dashboard/%(version)s-dge_dashboard_org_assignedRequests.js
+  contents:
+    - js/amcharts/organization/dge_dashboard_org_assignedRequests.js
+
+dge-org-distributionFormat-js:
+  filter: rjsmin
+  output: ckanext-dge-dashboard/%(version)s-dge_dashboard_org_distributionFormat.js
+  contents:
+    - js/amcharts/organization/dge_dashboard_org_distributionFormat.js
+
+dge-org-numCommentsByMonthYear-js:
+  filter: rjsmin
+  output: ckanext-dge-dashboard/%(version)s-dge_dashboard_org_numCommentsByMonthYear.js
+  contents:
+    - js/amcharts/organization/dge_dashboard_org_numCommentsByMonthYear.js
+
+dge-org-numDatasetsByMonthYear-js:
+  filter: rjsmin
+  output: ckanext-dge-dashboard/%(version)s-dge_dashboard_org_numDatasetsByMonthYear.js
+  contents:
+    - js/amcharts/organization/dge_dashboard_org_numDatasetsByMonthYear.js
+
+dge-pub-distributionFormat-js:
+  filter: rjsmin
+  output: ckanext-dge-dashboard/%(version)s-dge_dashboard_distributionFormat.js
+  contents:
+    - js/amcharts/public/dge_dashboard_distributionFormat.js
+
+dge-pub-distributionFormatByAdministrationLevel-js:
+  filter: rjsmin
+  output: ckanext-dge-dashboard/%(version)s-dge_dashboard_distributionFormatByAdministrationLevel.js
+  contents:
+    - js/amcharts/public/dge_dashboard_distributionFormatByAdministrationLevel.js
+
+dge-pub-numDatasetsByAdministrationLevel-js:
+  filter: rjsmin
+  output: ckanext-dge-dashboard/%(version)s-dge_dashboard_numDatasetsByAdministrationLevel.js
+  contents:
+    - js/amcharts/public/dge_dashboard_numDatasetsByAdministrationLevel.js
+
+dge-pub-numDatasetsByCategory-js:
+  filter: rjsmin
+  output: ckanext-dge-dashboard/%(version)s-dge_dashboard_numDatasetsByCategory.js
+  contents:
+    - js/amcharts/public/dge_dashboard_numDatasetsByCategory.js
+
+dge-pub-numDatasetsByMonthYear-js:
+  filter: rjsmin
+  output: ckanext-dge-dashboard/%(version)s-dge_dashboard_numDatasetsByMonthYear.js
+  contents:
+    - js/amcharts/public/dge_dashboard_numDatasetsByMonthYear.js
+
+dge-pub-numDrupalContentsByMonthYear-js:
+  filter: rjsmin
+  output: ckanext-dge-dashboard/%(version)s-dge_dashboard_numDrupalContentsByMonthYear.js
+  contents:
+    - js/amcharts/public/dge_dashboard_numDrupalContentsByMonthYear.js
+
+dge-pub-numVisitsDatosGobEsByMonth-js:
+  filter: rjsmin
+  output: ckanext-dge-dashboard/%(version)s-dge_dashboard_numVisitsDatosGobEsByMonth.js
+  contents:
+    - js/amcharts/public/dge_dashboard_numVisitsDatosGobEsByMonth.js
+
+dge-adm-numDatasetsByOrg-js:
+  filter: rjsmin
+  output: ckanext-dge-dashboard/%(version)s-dge_dashboard_adm_numDatasetsByOrg.js
+  contents:
+    - js/amstockchart/administrator/dge_dashboard_adm_numDatasetsByOrg.js
+
+dge-adm-drupalContentsByLikes-js:
+  filter: rjsmin
+  output: ckanext-dge-dashboard/%(version)s-dge_dashboard_adm_drupalContentsByLikes.js
+  contents:
+    - js/jsgrid/administrator/dge_dashboard_adm_drupalContentsByLikes.js
+
+dge-adm-drupalTop10VotedDatasets-js:
+  filter: rjsmin
+  output: ckanext-dge-dashboard/%(version)s-dge_dashboard_adm_drupalTop10VotedDatasets.js
+  contents:
+    - js/jsgrid/administrator/dge_dashboard_adm_drupalTop10VotedDatasets.js
+
+dge-adm-numDatasetsByNumRes-js:
+  filter: rjsmin
+  output: ckanext-dge-dashboard/%(version)s-dge_dashboard_adm_numDatasetsByNumRes.js
+  contents:
+    - js/jsgrid/administrator/dge_dashboard_adm_numDatasetsByNumRes.js
+
+dge-adm-numDrupalContentsByContentType-js:
+  filter: rjsmin
+  output: ckanext-dge-dashboard/%(version)s-dge_dashboard_adm_numDrupalContentsByContentType.js
+  contents:
+    - js/jsgrid/administrator/dge_dashboard_adm_numDrupalContentsByContentType.js
+
+dge-adm-numUsersByOrg-js:
+  filter: rjsmin
+  output: ckanext-dge-dashboard/%(version)s-dge_dashboard_adm_numUsersByOrg.js
+  contents:
+    - js/jsgrid/administrator/dge_dashboard_adm_numUsersByOrg.js
+
+dge-org-mostVisitedDatasets-js:
+  filter: rjsmin
+  output: ckanext-dge-dashboard/%(version)s-dge_dashboard_org_mostVisitedDatasets.js
+  contents:
+    - js/jsgrid/organization/dge_dashboard_org_mostVisitedDatasets.js
+
+dge-org-users-js:
+  filter: rjsmin
+  output: ckanext-dge-dashboard/%(version)s-dge_dashboard_org_users.js
+  contents:
+    - js/jsgrid/organization/dge_dashboard_org_users.js
+
+dge-pub-mostVisitedDatasets-js:
+  filter: rjsmin
+  output: ckanext-dge-dashboard/%(version)s-dge_dashboard_mostVisitedDatasets.js
+  contents:
+    - js/jsgrid/public/dge_dashboard_mostVisitedDatasets.js

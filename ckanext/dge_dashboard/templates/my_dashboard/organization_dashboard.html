@@ -1,5 +1,5 @@
 {% extends "page.html" %}
-{% block seo %}
+{% block seo_structured_data %}
   <script type="application/ld+json">
   {
     "@context": "http://schema.org",
@@ -20,16 +20,7 @@
         "position": 2,
         "item":
           {
-            "@id": "{{ g.site_url }}{{ h.url_for(controller='ckanext.dge_dashboard.controllers:DGEDashboardController', action='my_dashboard') }}",
-            "name": "{{ _('My Account') }}"
-          }
-      },
-      {
-        "@type": "ListItem",
-        "position": 3,
-        "item":
-          {
-            "@id": "{{ g.site_url }}{{ h.url_for(controller='ckanext.dge_dashboard.controllers:DGEDashboardController', action='my_dashboard') }}",
+            "@id": "{{ h.url_for('dgeDashboard.my_dashboard', qualified=True)) }}",
             "name": "{{ _('Organization Dashboard') }}"
           }
       }
@@ -40,8 +31,7 @@
 
 {% block subtitle %}{{ _('Organization Dashboard') }}{% endblock %}
 {% block breadcrumb_content %}
- <li>{% link_for _('My Account'), controller='ckanext.dge_dashboard.controllers:DGEDashboardController', action='my_dashboard' %}</li>
- <li class="active">{{ h.nav_link(_('My Dashboard'), controller='ckanext.dge_dashboard.controllers:DGEDashboardController', action='my_dashboard') }}</li>
+ <li>{{_('My Dashboard') }}</li>
 {% endblock %}
 {% block page_title_content %}{{ _('Organization Dashboard') }}{% endblock %}
 {% block catalog_downloads %}{% endblock %}
@@ -113,8 +103,8 @@
            data-module-divid = "tableOrgMostVisitedDatasets"
            data-module-no_data = "{{ _('The table contains no data') }}">
       </div>
-      {% set download_link=h.url_for(controller='ckanext.dge_dashboard.controllers:DGEDashboardController',action='org_datasets_csv')%}
-      <p><br/><a class="btn button btn-primary btn-sm pull-right" href="{{download_link}}"><i class="icon-download"></i>{{ _('Download as CSV') }}</a></p>
+      {% set download_link=h.url_for('dgeDashboard.org_datasets_csv')%}
+      <p><br/><a class="btn button btn-primary btn-sm pull-right" href="{{download_link}}"><i class="fa fa-arrow-circle-o-down"></i>{{ _('Download as CSV') }}</a></p>
     {% endif %}
   </div>
 
@@ -177,8 +167,8 @@
            data-module-no_data = "{{ _('The table contains no data') }}">
       </div>
       <div id="externalPager_users" class="external-pager jsgrid-pager-container" style="text-align:center"></div>
-      {% set download_link=h.url_for(controller='ckanext.dge_dashboard.controllers:DGEDashboardController',action='org_users_csv')%}
-      <p><br/><a class="btn button btn-primary btn-sm pull-right" href="{{download_link}}"><i class="icon-download"></i>{{ _('Download as CSV') }}</a></p>
+      {% set download_link=h.url_for('dgeDashboard.org_users_csv')%}
+      <p><br/><a class="btn button btn-primary btn-sm pull-right" href="{{download_link}}"><i class="fa fa-arrow-circle-o-down"></i>{{ _('Download as CSV') }}</a></p>
     {% endif %}
   </div>
 
@@ -252,9 +242,9 @@
 {%- block styles %}
   {{ super() }}
   <link rel="stylesheet" href="{% url_for_static "amcharts/plugins/export/export.css" %}" type="text/css" media="all" />
-  {% resource 'dge_dashboard/jsgrid/dge-jsgrid.css' %}
-  {% resource 'dge_dashboard/jsgrid/dge-jsgrid-theme.css' %}
-  {% resource 'dge_dashboard/dge-dashboard.css' %}
+  {% asset 'dge_dashboard/dge-jsgrid-css' %}
+  {% asset 'dge_dashboard/dge-jsgrid-theme-css' %}
+  {% asset 'dge_dashboard/dge-dashboard-css' %}
 {% endblock -%}
 
 
@@ -288,12 +278,12 @@
     <script src="{% url_for_static "jsgrid/i18n/jsgrid-gl.js" %}"></script>
     <script src="{% url_for_static "jsgrid/i18n/jsgrid-eu.js" %}"></script>
 
-    {% resource "dge_dashboard/amcharts/organization/dge_dashboard_org_numDatasetsByMonthYear.js" %}
-    {% resource "dge_dashboard/amcharts/organization/dge_dashboard_org_distributionFormat.js" %}
-    {% resource "dge_dashboard/amcharts/organization/dge_dashboard_org_assignedRequests.js" %}
-    {% resource "dge_dashboard/amcharts/organization/dge_dashboard_org_numCommentsByMonthYear.js" %}
-    {% resource "dge_dashboard/jsgrid/organization/dge_dashboard_org_mostVisitedDatasets.js" %}
-    {% resource "dge_dashboard/jsgrid/organization/dge_dashboard_org_users.js" %}
+    {% asset "dge_dashboard/dge-org-numDatasetsByMonthYear-js" %}
+    {% asset "dge_dashboard/dge-org-distributionFormat-js" %}
+    {% asset "dge_dashboard/dge-org-assignedRequests-js" %}
+    {% asset "dge_dashboard/dge-org-numCommentsByMonthYear-js" %}
+    {% asset "dge_dashboard/dge-org-mostVisitedDatasets-js" %}
+    {% asset "dge_dashboard/dge-org-users-js" %}
 
 {% endblock -%}
 

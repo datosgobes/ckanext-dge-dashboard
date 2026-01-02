@@ -1,6 +1,6 @@
-# Copyright (C) 2022 Entidad Pública Empresarial Red.es
+# Copyright (C) 2025 Entidad Pública Empresarial Red.es
 #
-# This file is part of "dge_dashboard (datos.gob.es)".
+# This file is part of "dge-dashboard (datos.gob.es)".
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -9,7 +9,7 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
@@ -21,8 +21,10 @@ import calendar
 import datetime
 import json
 import logging
+import html
 import traceback
-import urllib
+import urllib.request, urllib.parse, urllib.error
+import re
 from time import strptime
 
 import ckan.lib.helpers as h
@@ -30,29 +32,29 @@ import ckan.plugins.toolkit as toolkit
 import ckanext.dge.helpers as dh
 import ckanext.dge_scheming.helpers as dsh
 import ckanext.scheming.helpers as sh
-import paste.deploy.converters as converters
+import ckantoolkit as tk
 from ckan import logic
 from ckan.common import (
     _, c, json
 )
 from dateutil.relativedelta import relativedelta
-from pylons import config
+from ckan.plugins.toolkit import config
 
 ORDER_UNITS = ['E', 'A', 'L', 'U', 'I', 'J', 'P']
 
-TRANSLATED_UNITS = {'E': {'es': 'Administraci\u00F3n del Estado',
-                          'ca': 'Administraci\u00F3 de l\u0027Estat',
-                          'gl': 'Administraci\u00F3n do Estado',
+TRANSLATED_UNITS = {'E': {'es': 'Administraci\\u00F3n del Estado',
+                          'ca': 'Administraci\\u00F3 de l\\u0027Estat',
+                          'gl': 'Administraci\\u00F3n do Estado',
                           'eu': 'Estatuko Administrazioa',
                           'en': 'State Administration'},
-                    'A': {'es': 'Administraci\u00F3n Auton\u00F3ica',
-                          'ca': 'Administraci\u00F3 Auton\u00F3mica',
-                          'gl': 'Administraci\u00F3n Auton\u00F3mica',
+                    'A': {'es': 'Administraci\\u00F3n Auton\\u00F3ica',
+                          'ca': 'Administraci\\u00F3 Auton\\u00F3mica',
+                          'gl': 'Administraci\\u00F3n Auton\\u00F3mica',
                           'eu': 'Administrazio Autonomikoa',
                           'en': 'Regional Administration'},
-                    'L': {'es': 'Administraci\u00F3n Local',
-                          'ca': 'Administraci\u00F3 Local',
-                          'gl': 'Administraci\u00F3n Local',
+                    'L': {'es': 'Administraci\\u00F3n Local',
+                          'ca': 'Administraci\\u00F3 Local',
+                          'gl': 'Administraci\\u00F3n Local',
                           'eu': 'Toki Administrazioa',
                           'en': 'Local Administration'},
                     'U': {'es': 'Universidades',
@@ -62,12 +64,12 @@ TRANSLATED_UNITS = {'E': {'es': 'Administraci\u00F3n del Estado',
                           'en': 'Unibertsitateak'},
                     'I': {'es': 'Otras Instituciones',
                           'ca': 'Altres institucions',
-                          'gl': 'Outras instituci\u00F3ns',
+                          'gl': 'Outras instituci\\u00F3ns',
                           'eu': 'Beste instituzio batzuk',
                           'en': 'Other Institutions'},
-                    'J': {'es': 'Administraci\u00F3n de Justicia',
-                          'ca': 'Administraci\u00F3 de Just\u00EDcia',
-                          'gl': 'Administraci\u00F3n de Xustiza',
+                    'J': {'es': 'Administraci\\u00F3n de Justicia',
+                          'ca': 'Administraci\\u00F3 de Just\\u00EDcia',
+                          'gl': 'Administraci\\u00F3n de Xustiza',
                           'eu': 'Justizia Administrazioa',
                           'en': 'Legal Administration'},
                     'P': {'es': 'Entidad Privada',
@@ -131,6 +133,8 @@ SECTIONS = {'aplicaciones': {'color': "#76BEDF", 'bullet': "triangleDown",
             'salud-bienestar': {'color': '#30f834', 'bullet': "rectangle",
                             'bulletSize': 8},
             'turismo': {'color': '#5E63D8', 'bullet': "rectangle",
+                            'bulletSize': 8},
+            'justicia-sociedad': {'color': '#5E63D8', 'bullet': "rectangle",
                             'bulletSize': 8}}
 
 PUBLISHER_TYPES = {'harvester_publishers': {'color': "#C64A1A", 'bullet': "bubble",
@@ -138,12 +142,12 @@ PUBLISHER_TYPES = {'harvester_publishers': {'color': "#C64A1A", 'bullet': "bubbl
                    'manual_loading_publishers': {'color': "#D3D85E", 'bullet': "bubble",
                                                  'bulletSize': 12},
                    'both': {'color': "#5E63D8", 'bullet': "bubble",
-                                                 'bulletSize': 12},                             
+                                                 'bulletSize': 12},
                                                  }
 
 log = logging.getLogger(__name__)
 
-global_special_org_id = "a8693443-d272-48eb-b02e-a465ef2356f5"
+global_special_org_id = ""
 
 
 def _dge_dashboard_get_backend(filepath=None):
@@ -251,6 +255,16 @@ def _dge_dashboard_get_translated_administration_level(prefix=None):
         return units.get(DEFAULT_UNIT, None)
     return None
 
+def _dge_dashboard_check_prefix_administration_level(prefix=None):
+    '''
+    Given a prefix of administration level,
+    returns the same prefix when it's in ORDER_UNITS
+    or the default unit when it's not
+    '''
+    if prefix and prefix in ORDER_UNITS:
+        return prefix
+    else:
+        return DEFAULT_UNIT
 
 def _dge_dashboard_sort_dict_by_administration_level_key(aux_dict=None):
     '''
@@ -259,7 +273,7 @@ def _dge_dashboard_sort_dict_by_administration_level_key(aux_dict=None):
     '''
     result = None
     if aux_dict:
-        print aux_dict
+        print(aux_dict)
         for unit in ORDER_UNITS:
             item = aux_dict.get(unit, None)
             if item:
@@ -267,6 +281,24 @@ def _dge_dashboard_sort_dict_by_administration_level_key(aux_dict=None):
                     result = []
                 result.append(item)
     return result
+
+
+def _dge_dashboard_filter_for_export_dict_by_administration_level_key(result_data=None):
+    '''
+    Returns dictionary with a filter for export options in dashboard
+
+    La expresión [key for key in dictionary if key not in ORDER_UNITS] es una comprensión de lista en Python que genera una nueva lista.
+    Esta lista contiene todas las claves (key) del diccionario (dictionary) que no están presentes en la lista ORDER_UNITS.
+    y luego se eliminan.
+
+    '''
+    for dictionary in result_data:
+        keys_to_remove = [
+            key for key in dictionary if key not in ORDER_UNITS and key != 'year']
+        for key in keys_to_remove:
+            dictionary.pop(key, None)
+
+    return result_data
 
 
 def _dge_dashboard_data_initial_date():
@@ -300,7 +332,7 @@ def _dge_dashboard_data_num_comments_by_month_year(url=None, id_organization=Non
     month_data = {}
     if url:
         tmp_data = None
-        response = urllib.urlopen(url)
+        response = urllib.request.urlopen(url)
         if response:
             tmp_data = json.loads(response.read())
             if tmp_data:
@@ -325,7 +357,7 @@ def _dge_dashboard_data_num_comments_by_month_year(url=None, id_organization=Non
     str_initial_date = config.get('ckanext.dge_dashboard.initial_date', '2016-11')
     str_end_dat = datetime.datetime.now().strftime("%Y-%m")
     # if a previous date exists then it must be the initial date
-    for month in month_data.keys():
+    for month in list(month_data.keys()):
         # the string dates can be comparated because its format
         if month < str_initial_date:
             str_initial_date = month
@@ -365,8 +397,6 @@ def _dge_dashboard_data_num_comments_by_month_year(url=None, id_organization=Non
             "bullet": "yError",
             "bulletColor": "#9400D3",
             "bulletBorderThickness": 2,
-            #                     "customBullet": "/amcharts/data/images/purpleast.png",
-            #                     "customBulletField": "customBullet",
             "bulletSize": 5,
             "bulletOffset": 1,
             "title": _('dataset_comments'),
@@ -382,8 +412,6 @@ def _dge_dashboard_data_num_comments_by_month_year(url=None, id_organization=Non
             "bulletColor": "#00CC00",
             "bulletBorderThickness": 2,
             "bulletOffset": 1,
-            #                     "customBullet": "/amcharts/data/images/greenast.png",
-            #                     "customBulletField": "customBullet",
             "bulletSize": 5,
             "title": _('content_comments'),
             "valueField": 'content_comments',
@@ -397,9 +425,7 @@ def _dge_dashboard_data_num_comments_by_month_year(url=None, id_organization=Non
     return json.dumps(result_data), json.dumps(result_graphs)
 
 
-################################################
-## METODOS PARA CUADRO DE MANDO VISTA PUBLICA ##
-################################################
+
 def dge_dashboard_data_num_datasets_by_month_year():
     '''
     Returns data for datasets per month chart.
@@ -410,7 +436,7 @@ def dge_dashboard_data_num_datasets_by_month_year():
     try:
         url = _dge_dashboard_get_backend(config.get('ckanext.dge_dashboard.chart.datasets_month_year.url_data', None))
         if url:
-            response = urllib.urlopen(url)
+            response = urllib.request.urlopen(url)
             if response:
                 data = json.loads(response.read())
                 if data:
@@ -438,7 +464,7 @@ def dge_dashboard_data_num_datasets_by_administration_level():
         url = _dge_dashboard_get_backend(
             config.get('ckanext.dge_dashboard.chart.datasets_administration_level.url_data', None))
         if url:
-            response = urllib.urlopen(url)
+            response = urllib.request.urlopen(url)
             if response:
                 data = json.loads(response.read())
         if data:
@@ -456,7 +482,7 @@ def dge_dashboard_data_num_datasets_by_administration_level():
                         adm_levels[translated]['num_datasets'] = adm_levels[translated]['num_datasets'] + item.get('num_datasets', 0)
                     else:
                         adm_levels[translated] = item
-            result_data.extend(adm_levels.values())
+            result_data.extend(list(adm_levels.values()))
             return json.dumps(result_data), total, data_date
     except Exception as e:
         log.error(
@@ -476,7 +502,7 @@ def dge_dashboard_data_distribution_format():
     try:
         url = _dge_dashboard_get_backend(config.get('ckanext.dge_dashboard.chart.distribution_format.url_data', None))
         if url:
-            response = urllib.urlopen(url)
+            response = urllib.request.urlopen(url)
             if response:
                 data = json.loads(response.read())
         if data:
@@ -517,18 +543,19 @@ def dge_dashboard_data_distribution_format_by_administration_level():
         url = _dge_dashboard_get_backend(
             config.get('ckanext.dge_dashboard.chart.distribution_format_administration_level.url_data', None))
         if url:
-            response = urllib.urlopen(url)
+            response = urllib.request.urlopen(url)
             if response:
                 data = json.loads(response.read())
         if data:
             available_formats = {}
-            top = 0;
+            top = 0
             other = 0
             list_adm_level = []
             for item in data:
                 nitem = {}
                 level = None
-                for key, value in item.iteritems():
+                is_duplicate_format = False
+                for key, value in item.items():
                     if key == 'date':
                         if value:
                             nitem[key] = value
@@ -536,7 +563,8 @@ def dge_dashboard_data_distribution_format_by_administration_level():
                                 data_date = _dge_dashboard_convert_date(value)
                     elif key == 'level':
                         if value:
-                            level = value.upper();
+                            level = value.upper()
+                            level = _dge_dashboard_check_prefix_administration_level(level)
                             if not (result_levels.get(level, None)):
                                 translated = _dge_dashboard_get_translated_administration_level(value)
                                 if translated:
@@ -553,8 +581,15 @@ def dge_dashboard_data_distribution_format_by_administration_level():
                 if nitem and nitem.get('date', None) and nitem.get('format', None) and nitem.get('value', None):
                     if (result_data.get(level, None)) is None:
                         result_data[level] = []
-                    result_data[level].append(nitem)
-            for key, value in result_data.iteritems():
+                    if (result_data[level]) and level == DEFAULT_UNIT:
+                        for item in result_data[level]:
+                            if item.get('format') and item.get('format') == nitem.get('format', None):
+                                item['value'] = item['value'] + nitem['value']
+                                is_duplicate_format = True
+                    if not is_duplicate_format:
+                        result_data[level].append(nitem)
+                    is_duplicate_format = False
+            for key, value in result_data.items():
                 value = sorted(value, key=lambda k: k['value'], reverse=True)
                 result_data[key] = json.dumps(value)
 
@@ -582,14 +617,14 @@ def dge_dashboard_data_num_drupal_contents():
             config.get('ckanext.dge_dashboard.chart.drupal_contents_month_year.url_data', None))
         initial_zoom = config.get('ckanext.dge_dashboard.chart.drupal_contents_month_year.inital_zoom', 0.8)
         if url:
-            response = urllib.urlopen(url)
+            response = urllib.request.urlopen(url)
             if response:
                 data = json.loads(response.read())
         if data:
             types = []
             for item in data:
                 result_data.append(item)
-                for key, value in item.iteritems():
+                for key, value in item.items():
                     if key != 'date' \
                             and key in DRUPAL_CONTENT_TYPES \
                             and key not in EXCLUDED_DRUPAL_CONTENT_TYPES \
@@ -637,7 +672,7 @@ def dge_dashboard_data_num_datasets_by_category():
     try:
         url = _dge_dashboard_get_backend(config.get('ckanext.dge_dashboard.chart.datasets_category.url_data', None))
         if url:
-            response = urllib.urlopen(url)
+            response = urllib.request.urlopen(url)
             if response:
                 data = json.loads(response.read())
         if data:
@@ -666,8 +701,9 @@ def dge_dashboard_data_num_visits():
     result_data = []
     try:
         url = _dge_dashboard_get_backend(config.get('ckanext.dge_dashboard.chart.visits_month_year.url_data', None))
+        log.info('url %s', url)
         if url:
-            response = urllib.urlopen(url)
+            response = urllib.request.urlopen(url)
             if response:
                 data = json.loads(response.read())
                 if data:
@@ -679,6 +715,7 @@ def dge_dashboard_data_num_visits():
                     return json.dumps(result_data)
     except Exception as e:
         log.error('Exception in dge_dashboard_data_num_visits: %s', e)
+    log.info('result_data vacío')
     return []
 
 
@@ -690,7 +727,7 @@ def dge_dashboard_data_most_visited_datasets(visible_visits=None):
     data = None
     result_data = []
     if not visible_visits:
-        visible_visits = converters.asbool(
+        visible_visits = tk.asbool(
             config.get('ckanext.dge_dashboard.chart.most_visited_datasets.num_visits.visible', False))
     month_list = []
     month_name_list = []
@@ -699,11 +736,11 @@ def dge_dashboard_data_most_visited_datasets(visible_visits=None):
     try:
         url = _dge_dashboard_get_backend(config.get('ckanext.dge_dashboard.chart.most_visited_datasets.url_data', None))
         if url:
-            response = urllib.urlopen(url)
+            response = urllib.request.urlopen(url)
             if response:
                 data = json.loads(response.read())
                 if data:
-                    prefix_url = config.get('ckan.site_url') + h.url_for(controller='package', action='search') + "/"
+                    prefix_url = config.get('ckan.site_url') + h.url_for('package.search') + "/"
                     index = prefix_url.find('://')
                     if c.userobj and index >= 0:
                         prefix_url = 'https' + prefix_url[index:]
@@ -748,36 +785,34 @@ def dge_get_visibility_of_public_graphs(graph_names=None):
         for name in graph_names:
             if name:
                 if name == 'chartVisitsDatosGobEsByMonth':
-                    visibility[name] = converters.asbool(
+                    visibility[name] = tk.asbool(
                         config.get('ckanext.dge_dashboard.chart.visits_month_year.visible', False))
                 elif name == 'chartNumDrupalContentsByMonthYear':
-                    visibility[name] = converters.asbool(
+                    visibility[name] = tk.asbool(
                         config.get('ckanext.dge_dashboard.chart.drupal_contents_month_year.visible', False))
                 elif name == 'chartNumDatasetsByMonthYear':
-                    visibility[name] = converters.asbool(
+                    visibility[name] = tk.asbool(
                         config.get('ckanext.dge_dashboard.chart.datasets_month_year.visible', False))
                 elif name == 'chartNumDatasetsByAdministrationLevel':
-                    visibility[name] = converters.asbool(
+                    visibility[name] = tk.asbool(
                         config.get('ckanext.dge_dashboard.chart.datasets_administration_level.visible', False))
                 elif name == 'chartNumDatasetsByCategory':
-                    visibility[name] = converters.asbool(
+                    visibility[name] = tk.asbool(
                         config.get('ckanext.dge_dashboard.chart.datasets_category.visible', False))
                 elif name == 'chartMostVisitedDatasets':
-                    visibility[name] = converters.asbool(
+                    visibility[name] = tk.asbool(
                         config.get('ckanext.dge_dashboard.chart.most_visited_datasets.visible', False))
                 elif name == 'chartDistributionFormat':
-                    visibility[name] = converters.asbool(
+                    visibility[name] = tk.asbool(
                         config.get('ckanext.dge_dashboard.chart.distribution_format.visible', False))
                 elif name == 'chartDistributionFormatByAdministrationLevel':
-                    visibility[name] = converters.asbool(
+                    visibility[name] = tk.asbool(
                         config.get('ckanext.dge_dashboard.chart.distribution_format_administration_level.visible',
                                    False))
     return visibility
 
 
-##################################################
-## METODOS PARA CUADRO DE MANDO VISTA ORGANISMO ##
-##################################################
+
 def dge_dashboard_organization_data_num_datasets_by_month_year():
     '''
     Returns data for datasets per month chart.
@@ -794,7 +829,7 @@ def dge_dashboard_organization_data_num_datasets_by_month_year():
                 config.get('ckanext.dge_dashboard.chart.org.datasets_month_year.url_data', None))
             if url:
                 error_loading_data = False
-                response = urllib.urlopen(url)
+                response = urllib.request.urlopen(url)
                 if response:
                     data = json.loads(response.read())
                     if data:
@@ -830,7 +865,7 @@ def dge_dashboard_organization_data_distribution_format():
                 config.get('ckanext.dge_dashboard.chart.org.distribution_format.url_data', None))
             if url:
                 error_loading_data = False
-                response = urllib.urlopen(url)
+                response = urllib.request.urlopen(url)
                 if response:
                     data = json.loads(response.read())
             if data:
@@ -875,7 +910,7 @@ def dge_dashboard_organization_data_users():
             url = _dge_dashboard_get_backend(config.get('ckanext.dge_dashboard.chart.org.users.url_data', None))
             if url:
                 error_loading_data = False
-                response = urllib.urlopen(url)
+                response = urllib.request.urlopen(url)
                 if response:
                     data = json.loads(response.read())
             if data:
@@ -889,7 +924,6 @@ def dge_dashboard_organization_data_users():
                         if users:
                             if not data_date:
                                 data_date = _dge_dashboard_convert_date(item.get('date', None))
-                            # result_data = users.split(',')
                             list_users = users.split(',')
                             for user in list_users:
                                 if result_data is None:
@@ -922,7 +956,7 @@ def dge_dashboard_organization_data_assigned_requests():
                 config.get('ckanext.dge_dashboard.chart.org.assigned_requests.url_data', None))
             if url:
                 error_loading_data = False
-                response = urllib.urlopen(url)
+                response = urllib.request.urlopen(url)
                 if response:
                     data = json.loads(response.read())
             if data:
@@ -992,12 +1026,13 @@ def dge_dashboard_organization_data_most_visited_datasets():
                 config.get('ckanext.dge_dashboard.chart.org.most_visited_datasets.url_data', None))
             if url:
                 error_loading_data = False
-                response = urllib.urlopen(url)
+                response = urllib.request.urlopen(url)
                 if response:
-                    data = json.loads(response.read())
+                    response_content = response.read().decode('utf-8')
+                    clean_response_content = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', response_content)
+                    data = json.loads(clean_response_content)
                     if data:
-                        prefix_url = config.get('ckan.site_url') + h.url_for(controller='package',
-                                                                             action='search') + "/"
+                        prefix_url = config.get('ckan.site_url') + h.url_for('package.search') + "/"
                         index = prefix_url.find('://')
                         if c.userobj and index >= 0:
                             prefix_url = 'https' + prefix_url[index:]
@@ -1035,9 +1070,7 @@ def dge_dashboard_organization_data_most_visited_datasets():
         column_titles), error_loading_data
 
 
-######################################################
-## METODOS PARA CUADRO DE MANDO VISTA ADMINISTRADOR ##
-######################################################
+
 def dge_dashboard_administrator_data_num_datasets_by_administration_level():
     '''
     Returns data for published datataset per administration level.
@@ -1054,14 +1087,15 @@ def dge_dashboard_administrator_data_num_datasets_by_administration_level():
                 config.get('ckanext.dge_dashboard.chart.adm.datasets_administration_level.url_data', None))
             if url:
                 error_loading_data = False
-                response = urllib.urlopen(url)
+                response = urllib.request.urlopen(url)
                 if response:
                     data = json.loads(response.read())
                 if data:
                     list_adm_level = []
                     for item in data:
                         if item.get('year', None):
-                            for key, value in item.iteritems():
+                            num_datasets_aux = 0
+                            for key, value in item.items():
                                 if (key != 'year') and key not in list_adm_level:
                                     list_adm_level.append(key)
                                     translated = _dge_dashboard_get_translated_administration_level(key)
@@ -1076,9 +1110,15 @@ def dge_dashboard_administrator_data_num_datasets_by_administration_level():
                                         "lineAlpha": 0.5,
                                         "lineThickness": 2
                                     }
+                                if (key != 'year') and key not in ORDER_UNITS:
+                                    num_datasets_aux = num_datasets_aux + value
+                            if item.get('I', None):
+                                item['I'] = item['I'] + num_datasets_aux
                             result_data.append(item)
         result_graphs = _dge_dashboard_sort_dict_by_administration_level_key(graphs)
-        return json.dumps(result_data), json.dumps(result_graphs), error_loading_data
+        result_data_filtered = _dge_dashboard_filter_for_export_dict_by_administration_level_key(
+            result_data)
+        return json.dumps(result_data_filtered), json.dumps(result_graphs), error_loading_data
     except Exception as e:
         log.error('Exception in dge_dashboard_administrator_data_num_datasets_by_administration_level: %s', e)
         error_loading_data = True
@@ -1103,12 +1143,12 @@ def dge_dashboard_administrator_data_num_datasets_by_organization():
             data2 = None
             if url:
                 error_loading_data = False
-                response = urllib.urlopen(url)
+                response = urllib.request.urlopen(url)
                 if response:
                     data = json.loads(response.read())
             if url_2:
                 error_loading_data = False
-                response2 = urllib.urlopen(url_2)
+                response2 = urllib.request.urlopen(url_2)
                 if response2:
                     data2 = json.loads(response2.read())
             if data and data2:
@@ -1130,7 +1170,6 @@ def dge_dashboard_administrator_data_num_datasets_by_organization():
                         elif org in not_found_orgs:
                             pass
                         else:
-                            # Comprobar que el usuario no sea la organizacion "aportaview". Si lo es, hacemos el not_found si es admin, que haga el org_title
                             org_id_aux = None
                             orgs_aux = toolkit.get_action('organization_list_for_user')(
                                 data_dict={'permission': 'read'})
@@ -1193,7 +1232,7 @@ def dge_dashboard_administrator_data_num_datasets_by_num_resources():
             data = None
             if url:
                 error_loading_data = False
-                response = urllib.urlopen(url)
+                response = urllib.request.urlopen(url)
                 if response:
                     data = json.loads(response.read())
             if data:
@@ -1244,7 +1283,7 @@ def dge_dashboard_administrator_data_num_publishers_by_month_year():
                 config.get('ckanext.dge_dashboard.chart.adm.publishers_month_year.url_data', None))
             if url:
                 error_loading_data = False
-                response = urllib.urlopen(url)
+                response = urllib.request.urlopen(url)
                 if response:
                     data = json.loads(response.read())
                 if data:
@@ -1252,7 +1291,7 @@ def dge_dashboard_administrator_data_num_publishers_by_month_year():
                     for item in data:
                         if item.get('year', None):
                             result_data.append(item)
-                            for key, value in item.iteritems():
+                            for key, value in item.items():
                                 if (key != 'year') and key not in list_adm_level:
                                     list_adm_level.append(key)
                                     if result_graphs is None:
@@ -1292,7 +1331,7 @@ def dge_dashboard_administrator_data_num_publishers_by_administration_level():
         url = _dge_dashboard_get_backend(
             config.get('ckanext.dge_dashboard.chart.adm.publishers_adm_level.url_data', None))
         if url:
-            response = urllib.urlopen(url)
+            response = urllib.request.urlopen(url)
             if response:
                 data = json.loads(response.read())
             if data:
@@ -1340,7 +1379,7 @@ def dge_dashboard_administrator_data_assigned_requests():
                 config.get('ckanext.dge_dashboard.chart.adm.assigned_requests.url_data', None))
             if url:
                 error_loading_data = False
-                response = urllib.urlopen(url)
+                response = urllib.request.urlopen(url)
                 if response:
                     data = json.loads(response.read())
             if data:
@@ -1377,7 +1416,7 @@ def dge_dashboard_administrator_data_users():
             url = _dge_dashboard_get_backend(config.get('ckanext.dge_dashboard.chart.adm.users.url_data', None))
             if url:
                 error_loading_data = False
-                response = urllib.urlopen(url)
+                response = urllib.request.urlopen(url)
                 if response:
                     data = json.loads(response.read())
             if data:
@@ -1414,7 +1453,7 @@ def dge_dashboard_administrator_data_users_by_adm_level():
                 config.get('ckanext.dge_dashboard.chart.adm.users_adm_level.url_data', None))
             if url:
                 error_loading_data = False
-                response = urllib.urlopen(url)
+                response = urllib.request.urlopen(url)
                 if response:
                     data = json.loads(response.read())
             if data:
@@ -1432,7 +1471,7 @@ def dge_dashboard_administrator_data_users_by_adm_level():
                             adm_levels[translated]['num_users'] = adm_levels[translated]['num_users'] + item.get('num_users', 0)
                         else:
                             adm_levels[translated] = item
-                result_data.extend(adm_levels.values())
+                result_data.extend(list(adm_levels.values()))
                 return json.dumps(result_data), total, data_date, error_loading_data
     except Exception as e:
         log.error('Exception in dge_dashboard_administrator_data_users_by_adm_level: %s', e)
@@ -1457,7 +1496,7 @@ def dge_dashboard_administrator_published_drupal_contents():
                 config.get('ckanext.dge_dashboard.chart.adm.pusblished_drupal_contents.url_data', None))
             if url:
                 error_loading_data = False
-                response = urllib.urlopen(url)
+                response = urllib.request.urlopen(url)
                 if response:
                     data = json.loads(response.read())
             if data:
@@ -1482,23 +1521,23 @@ def dge_dashboard_administrator_published_drupal_contents():
 def dge_dashboard_administrator_drupal_contents_by_likes(limit=None):
     data = None
     error_loading_data = True
-    likes_template = u'{} ({}: {{}})'.format(_('Likes'), _('Total'))
+    likes_template = '{} ({}: {{}})'.format(_('Likes'), _('Total'))
     try:
         if _dge_dashboard_user_is_sysadmin():
             url = _dge_dashboard_get_backend(
                 config.get('ckanext.dge_dashboard.chart.adm.drupal_contents_by_likes.url_data', None))
             if url:
                 error_loading_data = False
-                response = urllib.urlopen(url)
+                response = urllib.request.urlopen(url)
                 if response:
-                    data = json.load(response, encoding='latin1')
+                    data = json.load(response)
             if data:
                 translated = data['data']
                 total = 0
                 for c, obj in enumerate(translated, 1):
                     obj['name'] = _(obj['name'])
                     obj['content_type'] = _(obj['content_type'])
-                    obj['link'] = u'<a href="{url}">{name}</a>'.format(**obj)
+                    obj['link'] = '<a href="{url}">{name}</a>'.format(**obj)
                     total += obj['likes']
                     if limit is not None and limit == c:
                         break
@@ -1524,22 +1563,22 @@ def dge_dashboard_administrator_drupal_contents_by_likes(limit=None):
 def dge_dashboard_administrator_drupal_top10_voted_datasets(limit=None):
     data = None
     error_loading_data = True
-    likes_template = u'{} ({}: {{}})'.format(_('Likes'), _('Total'))
+    likes_template = '{} ({}: {{}})'.format(_('Likes'), _('Total'))
     try:
         if _dge_dashboard_user_is_sysadmin():
             url = _dge_dashboard_get_backend(
                 config.get('ckanext.dge_dashboard.chart.adm.drupal_top10_voted_datasets.url_data', None))
             if url:
                 error_loading_data = False
-                response = urllib.urlopen(url)
+                response = urllib.request.urlopen(url)
                 if response:
-                    data = json.load(response, encoding='latin1')
+                    data = json.load(response)
             if data:
                 translated = data['data']
                 total = 0
                 for c, obj in enumerate(translated, 1):
                     obj['name'] = _(obj['name'])
-                    obj['link'] = u'<a href="{url}">{name}</a>'.format(**obj)
+                    obj['link'] = '<a href="{url}">{name}</a>'.format(**obj)
                     total += obj['likes']
                     if limit is not None and c == limit:
                         break
@@ -1597,7 +1636,7 @@ def dge_dashboard_administrator_data_num_visits_by_section():
                 config.get('ckanext.dge_dashboard.chart.adm.visits_month_year.url_data', None))
             if url:
                 error_loading_data = False
-                response = urllib.urlopen(url)
+                response = urllib.request.urlopen(url)
                 if response:
                     data = json.loads(response.read())
                 if data:
@@ -1605,7 +1644,7 @@ def dge_dashboard_administrator_data_num_visits_by_section():
                     for item in data:
                         nitem = {}
                         if item.get('date', None):
-                            for key, value in item.iteritems():
+                            for key, value in item.items():
                                 if (key != 'date') and key not in section_list:
                                     section_list.append(key)
                                     if result_graphs is None:
@@ -1634,7 +1673,7 @@ def dge_dashboard_administrator_data_num_visits_by_section():
 
 def dge_dashboard_administrator_datasets_by_org():
     '''
-    Returns the number of datasets per organization. 
+    Returns the number of datasets per organization.
     Get data of endpoint set in ckanext.dge_dashboard.chart.adm.datasets_month_year_org.url_data config property
     '''
     data = None
@@ -1651,12 +1690,12 @@ def dge_dashboard_administrator_datasets_by_org():
             data2 = None
             if url:
                 error_loading_data = False
-                response = urllib.urlopen(url)
+                response = urllib.request.urlopen(url)
                 if response:
                     data = json.loads(response.read())
             if url_2:
                 error_loading_data = False
-                response2 = urllib.urlopen(url_2)
+                response2 = urllib.request.urlopen(url_2)
                 if response2:
                     data2 = json.loads(response2.read())
 
@@ -1681,7 +1720,6 @@ def dge_dashboard_administrator_datasets_by_org():
                         elif org in not_found_orgs:
                             pass
                         else:
-                            # Comprobar que el usuario no sea la organizacion "aportaview". Si lo es, hacemos el not_found si es admin, que haga el org_title
                             org_id_aux = None
                             orgs_aux = toolkit.get_action('organization_list_for_user')(
                                 data_dict={'permission': 'read'})
@@ -1753,7 +1791,7 @@ def dge_dashboard_administrator_organizations_by_level():
         url = _dge_dashboard_get_backend(
             config.get('ckanext.dge_dashboard.chart.adm.organizations_adm_level.url_data', None))
         if url:
-            response = urllib.urlopen(url)
+            response = urllib.request.urlopen(url)
             if response:
                 data = json.loads(response.read())
             if data:
