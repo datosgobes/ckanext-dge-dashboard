@@ -1,5 +1,5 @@
 {% extends "page.html" %}
-{% block seo %}
+{% block seo_structured_data %}
   <script type="application/ld+json">
   {
     "@context": "http://schema.org",
@@ -20,7 +20,7 @@
         "position": 2,
         "item":
           {
-            "@id": "{{ g.site_url }}{{ h.url_for(controller='ckanext.dge_dashboard.controllers:DGEDashboardController', action='dashboard') }}",
+            "@id": "{{ h.url_for('dgeDashboard.dashboard', qualified=True) }}",
             "name": "{{ _('Impact') }}"
           }
       },
@@ -29,7 +29,7 @@
         "position": 3,
         "item":
           {
-            "@id": "{{ g.site_url }}{{ h.url_for(controller='ckanext.dge_dashboard.controllers:DGEDashboardController', action='dashboard') }}",
+            "@id": "{{ h.url_for('dgeDashboard.dashboard', qualified=True) }}",
             "name": "{{ _('Dashboard') }}"
           }
       }
@@ -40,8 +40,8 @@
 
 {% block subtitle %}{{ _('Dashboard') }}{% endblock %}
 {% block breadcrumb_content %}
-  <li>{{ h.nav_link(_('Impact'), controller='ckanext.dge_dashboard.controllers:DGEDashboardController', action='dashboard') }}</li>
-  <li class="active">{{ h.nav_link(_('Dashboard'), controller='ckanext.dge_dashboard.controllers:DGEDashboardController', action='dashboard') }}</li>
+  <li>{{ h.nav_link(_('Impact'), named_route='dgeDashboard.dashboard') }}</li>
+  <li>{{ _('Dashboard') }}</li>
 {% endblock %}
 {% block page_title_content %}{{ _('Dashboard') }}{% endblock %}
 {% block catalog_downloads %}{% endblock %}
@@ -238,8 +238,8 @@
            data-module-divid = "tableMostVisitedDatasets"
            data-module-no_data = "{{ _('The table contains no data') }}">
     </div>
-    {% set download_link=h.url_for(controller='ckanext.dge_dashboard.controllers:DGEDashboardController',action='most_visited_datasets_csv')%}
-    <p><br/><a class="btn button btn-primary btn-sm pull-right" href="{{download_link}}"><i class="icon-download"></i>{{ _('Download as CSV') }}</a></p>
+    {% set download_link=h.url_for('dgeDashboard.most_visited_datasets_csv')%}
+    <p><br/><a class="btn button btn-primary btn-sm pull-right" href="{{download_link}}"><i class="fa fa-arrow-circle-o-down"></i>{{ _('Download as CSV') }}</a></p>
     {% else %}
       <p>{{ _('The table contains no data') }}</p>
     {% endif %}
@@ -251,8 +251,8 @@
 
   {% if visibility_of_public_graphs['chartDistributionFormat'] or
         visibility_of_public_graphs['chartDistributionFormatByAdministrationLevel']%}
-  {% set data_date = None %} 
-  
+  {% set data_date = None %}
+
   {% set formats_data, total, data_date = h.dge_dashboard_data_distribution_format() %}
   {% set formats_al_data, data_date_al = h.dge_dashboard_data_distribution_format_by_administration_level() %}
   {% if formats_data|length > 2 or formats_al_data|length > 2 %}
@@ -262,7 +262,7 @@
       <p>
         <strong>{{ _('Distributions format') }}</strong>
         {% if (data_date) %}<br/>{{ _('Updated date') }}: {{ data_date}}{% endif %}
-        {% set description = _('Distributions format description') %} 
+        {% set description = _('Distributions format description') %}
         {% if description %}<br/> {{ description }}{% endif %}
       </p>
     </div>
@@ -272,13 +272,13 @@
       <p>
         <strong>{{ _('Distributions format by administration level') }}</strong>
         {% if (data_date_al) %}<br/>{{ _('Updated date') }}: {{ data_date_al}}{% endif %}
-        {% set description = _('Distributions format by administration level description') %} 
+        {% set description = _('Distributions format by administration level description') %}
         {% if description %}<br/> {{ description }}{% endif %}
       </p>
       {% if formats_al_data|length > 2 and data_date_al|length > 2 %}
       <div style="text-align:right">
         <div class="form-select control-group">
-          <label for="field-order-by">{{ _('Select') }}</label>
+          <label for="mysel">{{ _('Select') }}</label>
           <div class="dge-field-order-by">
             <select id="mysel" onchange="setDataSet(JSON.parse(this.options[this.selectedIndex].value), this.options[this.selectedIndex].id)">
               {% for t in formats_al_data:%}
@@ -293,7 +293,7 @@
     {% endif %}
     {% if visibility_of_public_graphs['chartDistributionFormat'] and formats_data %}
       <div class="chartdiv2">
-      <div id="chartDistributionFormat" class="chartdiv" 
+      <div id="chartDistributionFormat" class="chartdiv"
            data-module="dge_dashboard_distributionFormat"
            data-module-data_provider={% if formats_data %} "{{ formats_data }}" {% else %} "{{ [] }}" {% endif%}
            data-module-language="{{ current_lang }}"
@@ -310,7 +310,7 @@
 
     {% if visibility_of_public_graphs['chartDistributionFormatByAdministrationLevel'] and formats_al_data %}
     <div class="chartdiv2">
-      <div id="chartDistributionFormatByAdministrationLevel" class="chartdiv" 
+      <div id="chartDistributionFormatByAdministrationLevel" class="chartdiv"
            data-module="dge_dashboard_distributionFormatByAdministrationLevel"
            data-module-data_provider = {% if formats_al_data %} "{{ formats_al_data[0][1] }}" {% else %} "{{ [] }} " {% endif%}
            data-module-language="{{ current_lang }}"
@@ -341,9 +341,9 @@
 {%- block styles %}
   {{ super() }}
   <link rel="stylesheet" href="{% url_for_static "amcharts/plugins/export/export.css" %}" type="text/css" media="all" />
-  {% resource 'dge_dashboard/jsgrid/dge-jsgrid.css' %}
-  {% resource 'dge_dashboard/jsgrid/dge-jsgrid-theme.css' %}
-  {% resource 'dge_dashboard/dge-dashboard.css' %}
+  {% asset 'dge_dashboard/dge-jsgrid-css' %}
+  {% asset 'dge_dashboard/dge-jsgrid-theme-css' %}
+  {% asset 'dge_dashboard/dge-dashboard-css' %}
 {% endblock -%}
 
 
@@ -368,22 +368,21 @@
     <script src="{% url_for_static "amcharts/lang/es.js" %}"></script>
     <script src="{% url_for_static "amcharts/plugins/export/lang/es.js" %}"></script>
 
-    <script src="{% url_for_static "jsgrid/jquery-1.8.3.min.js" %}"></script>
-    <script src="{% url_for_static "jsgrid/jsgrid.js" %}"></script>
-    <script src="{% url_for_static "jsgrid/i18n/jsgrid-es.js" %}"></script>
-    <script src="{% url_for_static "jsgrid/i18n/jsgrid-en.js" %}"></script>
-    <script src="{% url_for_static "jsgrid/i18n/jsgrid-ca.js" %}"></script>
-    <script src="{% url_for_static "jsgrid/i18n/jsgrid-gl.js" %}"></script>
-    <script src="{% url_for_static "jsgrid/i18n/jsgrid-eu.js" %}"></script>
+    <script type="text/javascript" src="{% url_for_static "jsgrid/jquery-1.8.3.min.js" %}"></script>
+    <script type="text/javascript" src="{% url_for_static "jsgrid/jsgrid.js" %}"></script>
+    <script type="text/javascript" src="{% url_for_static "jsgrid/i18n/jsgrid-es.js" %}"></script>
+    <script type="text/javascript" src="{% url_for_static "jsgrid/i18n/jsgrid-en.js" %}"></script>
+    <script type="text/javascript" src="{% url_for_static "jsgrid/i18n/jsgrid-ca.js" %}"></script>
+    <script type="text/javascript" src="{% url_for_static "jsgrid/i18n/jsgrid-gl.js" %}"></script>
+    <script type="text/javascript" src="{% url_for_static "jsgrid/i18n/jsgrid-eu.js" %}"></script>
 
-    {% resource "dge_dashboard/amcharts/public/dge_dashboard_numDatasetsByMonthYear.js" %}
-    {% resource "dge_dashboard/amcharts/public/dge_dashboard_numDatasetsByAdministrationLevel.js" %}
-    {% resource "dge_dashboard/amcharts/public/dge_dashboard_distributionFormat.js" %}
-    {% resource "dge_dashboard/amcharts/public/dge_dashboard_distributionFormatByAdministrationLevel.js" %}
-    {% resource "dge_dashboard/amcharts/public/dge_dashboard_numDatasetsByCategory.js" %}
-    {% resource "dge_dashboard/amcharts/public/dge_dashboard_numDrupalContentsByMonthYear.js" %}
-    {% resource "dge_dashboard/amcharts/public/dge_dashboard_numVisitsDatosGobEsByMonth.js" %}
-    {% resource "dge_dashboard/jsgrid/public/dge_dashboard_mostVisitedDatasets.js" %}
+    {% asset "dge_dashboard/dge-pub-numDatasetsByMonthYear-js" %}
+    {% asset "dge_dashboard/dge-pub-numDatasetsByAdministrationLevel-js" %}
+    {% asset "dge_dashboard/dge-pub-distributionFormat-js" %}
+    {% asset "dge_dashboard/dge-pub-distributionFormatByAdministrationLevel-js" %}
+    {% asset "dge_dashboard/dge-pub-numDatasetsByCategory-js" %}
+    {% asset "dge_dashboard/dge-pub-numDrupalContentsByMonthYear-js" %}
+    {% asset "dge_dashboard/dge-pub-numVisitsDatosGobEsByMonth-js" %}
+    {% asset "dge_dashboard/dge-pub-mostVisitedDatasets-js" %}
 
 {% endblock -%}
-

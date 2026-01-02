@@ -7,7 +7,7 @@
 {% set visible_impact = '' %}
 {% set active_impact = '' %}
 {% set active_impact_a = '' %}
-{% if (c.controller == 'ckanext.dge_dashboard.controllers:DGEDashboardController' and c.action == 'dashboard')%}
+{% if (c.controller == 'dgeDashboard' and c.action == 'dashboard')%}
   {% set visible_impact = ' is-visible' %}
   {% set active_impact = ' active' %}
   {% set active_impact_a = " class='active'" %}
@@ -16,19 +16,19 @@
 {% set visible_my_account2 = '' %}
 {% set active_my_account2 = '' %}
 {% set active_my_account_a2 = '' %}
-{% if (c.controller == 'ckanext.dge.controllers:DGEPackageController' 
+{% if (c.controller == 'dgePackage' 
     or c.controller == 'organization' 
-    or c.controller == 'ckanext.dge.controllers:DGEOrganizationController'
-    or c.controller == 'ckanext.harvest.controllers.view:ViewController'
+    or c.controller == 'dgeOrganization'
+    or c.controller == 'dgeDataservice'
+    or c.controller == 'harvester'
     or (c.controller == 'package' and c.dataset_type == 'harvest')
-    or (c.controller == 'ckanext.dge_dashboard.controllers:DGEDashboardController' and c.action == 'my_dashboard'))%}
+    or (c.controller == 'dgeDashboard' and c.action == 'my_dashboard'))%}
   {% set visible_my_account2 = ' is-visible' %}
   {% set active_my_account2 = ' active' %}
   {% set active_my_account_a2 = " class='active'" %}
 {% endif %}
-
 {% block impact_menu %}
-  <li class="leaf has-children{{ active_impact }}"><a href="#impact">{{ _('Impact') }}</a></li>
+  <li class="leaf has-children{{ active_impact }}"><a href="#impact"{{active_impact_a}}>{{ _('Impact') }}</a></li>
 {% endblock %}
 
 {% block my_account_menu %}
@@ -40,10 +40,10 @@
 {% endblock %}
 
 {% block dashboard %}
-  {% if (c.controller == 'ckanext.dge_dashboard.controllers:DGEDashboardController' and c.action == 'dashboard') %}
-  <li class="leaf{{ active_li }}"><a href="{{ h.url_for(controller='ckanext.dge_dashboard.controllers:DGEDashboardController', action='dashboard') }}" class="{{ active_a }}">{{ _('Dashboard') }}</a></li>
+  {% if (c.controller == 'dgeDashboard' and c.action == 'dashboard') %}
+  <li class="leaf{{ active_li }}"><a href="{{ h.url_for('dgeDashboard.dashboard') }}" class="{{ active_a }}">{{ _('Dashboard') }}</a></li>
   {% else %}
-  <li class="leaf"><a href="{{ h.url_for(controller='ckanext.dge_dashboard.controllers:DGEDashboardController', action='dashboard') }}">{{ _('Dashboard') }}</a></li>
+  <li class="leaf"><a href="{{ h.url_for('dgeDashboard.dashboard') }}">{{ _('Dashboard') }}</a></li>
   {% endif %}
 {% endblock %}
 
@@ -52,9 +52,9 @@
 {% endblock %}
 
 {% block my_dashboard %}
-  {% if (c.controller == 'ckanext.dge_dashboard.controllers:DGEDashboardController' and c.action == 'my_dashboard') %}
-  <li class="leaf{{ active_li }}"><a href="{{ h.url_for(controller='ckanext.dge_dashboard.controllers:DGEDashboardController', action='my_dashboard') }}" class="{{ active_a }}">{{ _('My Dashboard') }}</a></li>
+  {% if (c.controller == 'dgeDashboard' and c.action == 'my_dashboard') %}
+  <li class="leaf{{ active_li }}"><a href="{{ h.url_for('dgeDashboard.my_dashboard') }}" class="{{ active_a }}">{{ _('My Dashboard') }}</a></li>
   {% else %}
-  <li class="leaf"><a href="{{ h.url_for(controller='ckanext.dge_dashboard.controllers:DGEDashboardController', action='my_dashboard') }}">{{ _('My Dashboard') }}</a></li>
+  <li class="leaf"><a href="{{ h.url_for('dgeDashboard.my_dashboard') }}">{{ _('My Dashboard') }}</a></li>
   {% endif %}
 {% endblock%}

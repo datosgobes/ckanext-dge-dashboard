@@ -1,5 +1,5 @@
 # Catalan translations for ckanext-dge-dashboard.
-# Copyright (C) 2022 Entidad Pública Empresarial Red.es
+# Copyright (C) 2025 Entidad Pública Empresarial Red.es
 #
 # This file is part of "dge_dashboard (datos.gob.es)".
 #
@@ -223,7 +223,7 @@ msgstr ""
 "per mesos per a les seccions: Catàleg, Casos de reutilització, "
 "Aplicacions, Iniciatives, Quadre de comandament, Sector medi ambient, "
 "Sector cultura i lleure, Sector educació, Sector transport, Sector turisme, "
-"Sector salut i benestar, Notícies, Esdeveniments, Entrevistes, Butlletins, "
+"Sector justícia i societat, Sector salut i benestar, Notícies, Esdeveniments, Entrevistes, Butlletins, "
 "Blogs, Disponibilitat de dades i Documentació."
 
 #: ckanext/dge_dashboard/templates/my_dashboard/organization_dashboard.html:58
@@ -243,10 +243,14 @@ msgstr "Evolució dels comentaris rebuts"
 #: ckanext/dge_dashboard/templates/my_dashboard/organization_dashboard.html:225
 msgid "Evolution of my received comments description"
 msgstr ""
-"Evolució temporal dels comentaris rebuts a final de mes diferenciant "
-"entre els referits als conjunts de dades del catàleg i els comentaris "
-"rebuts en altres seccions del portal com ara aplicacions, disponibilitat "
-"de dades, etc."
+"Evolució temporal dels comentaris que s’han rebut en acabar cada mes, "
+"diferenciant entre els que es refereixen als conjunts de dades del catàleg i "
+"els que es reben en altres seccions del portal. Aquests últims es poden referir, "
+"per una banda, a iniciatives, aplicacions o empreses reutilitzadores, "
+"si l’organisme publicador ha donat d’alta algun d’aquests continguts, i, per l’altra banda, "
+"a disponibilitat de dades, sempre que es tingui assignada alguna petició de dades feta per algun usuari del portal. "
+"En tots els casos, els comentaris que fan els usuaris generen un avís d’arribada "
+"per correu electrònic adreçat als usuaris registrats de l’organisme publicador."
 
 #: ckanext/dge_dashboard/templates/dashboard/dashboard.html:134
 msgid "Evolution of published datasets"
@@ -908,6 +912,9 @@ msgstr "Salut i benestar"
 
 msgid "turismo"
 msgstr "Turisme"
+
+msgid "justicia-sociedad"
+msgstr "Justícia i societat"
 
 msgid "sectores"
 msgstr "Sectors"

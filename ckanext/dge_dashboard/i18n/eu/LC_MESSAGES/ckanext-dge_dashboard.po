@@ -1,5 +1,5 @@
 # Basque translations for ckanext-dge-dashboard.
-# Copyright (C) 2022 Entidad Pública Empresarial Red.es
+# Copyright (C) 2025 Entidad Pública Empresarial Red.es
 #
 # This file is part of "dge_dashboard (datos.gob.es)".
 #
@@ -224,7 +224,7 @@ msgstr ""
 "Datos.gob.es atariko orrietara egindako bisiten datuen denborazko bilakaera "
 "hilabeteka ataletarako: katalogoa, berrerabilpen kasuak, "
 "aplikazioak, ekimenak, aginte-koadroa, ingurumena, kultura eta aisia, hezkuntza, "
-"garraioa, turismoa, osasuna eta ongizatea, berriak, "
+"garraioa, turismoa, justizia eta gizartea, osasuna eta ongizatea, berriak, "
 "gertaerak, elkarrizketak  buletinak, bloga, datuen erabilgarritasuna eta "
 "dokumentazioa. "
 
@@ -245,9 +245,14 @@ msgstr "Jasotako iruzkinen bilakaera"
 #: ckanext/dge_dashboard/templates/my_dashboard/organization_dashboard.html:225
 msgid "Evolution of my received comments description"
 msgstr ""
-"Hilabete bukaeran jasotako iruzkinen denbora-bilakaera, katalogoaren "
-"datu-multzoei buruzkoak eta atariko beste ataletan (hala nola, "
-"aplikazioak, datuen erabilgarritasuna, etab.) jasotakoak bereiztuz."
+"Hilabete bakoitzaren amaieran jasotako iruzkinen denboraren araberako eboluzioa, "
+"katalogoaren datu-multzoei buruzkoak eta atariko beste atal batzuetan jasotako iruzkinak bereiziz. "
+"Azken horiek, alde batetik, berrerabiltzen duten ekimen, aplikazio edo enpresei buruzkoak izan daitezke, "
+"erakunde argitaratzaileak eduki horietako bati alta eman badio, eta, bestetik, "
+"datuen eskuragarritasunari buruzkoak, betiere atariko erabiltzaileren batek egindako datu-eskaeraren bat esleituta badu. "
+"Kasu guztietan, erabiltzaileek egindako iruzkinek posta elektroniko bidezko iritsi izanaren oharra sortzen dute, "
+"erakunde argitaratzailearen erregistratutako erabiltzaileei zuzenduta."
+
 
 #: ckanext/dge_dashboard/templates/dashboard/dashboard.html:134
 msgid "Evolution of published datasets"
@@ -906,6 +911,9 @@ msgstr "Osasuna eta ongizatea"
 
 msgid "turismo"
 msgstr "Turismoa"
+
+msgid "justicia-sociedad"
+msgstr "Justizia eta gizartea"
 
 msgid "sectores"
 msgstr "Sektoreak"

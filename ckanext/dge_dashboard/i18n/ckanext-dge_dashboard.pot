@@ -1,5 +1,4 @@
-# Translations template for ckanext-dge-dashboard.
-# Copyright (C) 2022 Entidad Pública Empresarial Red.es
+# Copyright (C) 2025 Entidad Pública Empresarial Red.es
 #
 # This file is part of "dge_dashboard (datos.gob.es)".
 #

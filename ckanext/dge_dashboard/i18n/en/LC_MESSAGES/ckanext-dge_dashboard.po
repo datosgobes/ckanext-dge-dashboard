@@ -1,5 +1,5 @@
 # English translations for ckanext-dge-dashboard.
-# Copyright (C) 2022 Entidad Pública Empresarial Red.es
+# Copyright (C) 2025 Entidad Pública Empresarial Red.es
 #
 # This file is part of "dge_dashboard (datos.gob.es)".
 #
@@ -223,7 +223,7 @@ msgstr ""
 "Evolution over time of visits to pages data to the datos.gob.es portal by "
 "month and section: catalogue, cases of reuse, applications, initiatives, "
 "dashboard, environment sector, culture and leisure sector, education sector, "
-"transport sector, tourism sector, health and wellness sector, news, events, "
+"transport sector, tourism sector, justice and society sector, health and wellness sector, news, events, "
 "interviews, newsletters, blogs, data availability and documentation."
 
 #: ckanext/dge_dashboard/templates/my_dashboard/organization_dashboard.html:58
@@ -243,10 +243,14 @@ msgstr "Evolution of comments received"
 #: ckanext/dge_dashboard/templates/my_dashboard/organization_dashboard.html:225
 msgid "Evolution of my received comments description"
 msgstr ""
-"Evolution over time of the comments received at the end of the month, "
-"distinguishing between comments on catalogue data sets and comments "
-"received in other sections of the portal such as applications, data "
-"availability, etc."
+"Variation over time of the comments received at the end of each month, "
+"differentiating between those referring to the catalogue datasets and "
+"those received in other sections of the portal. The latter may refer, "
+"on the one hand, to initiatives, applications or re-user companies, "
+"if the publishing body has registered any of such content and, on the other hand, "
+"data availability, whenever any request for data has been made by a portal user. "
+"In any event, comments made by users create an e-mail notification addressed to registered users of the publishing body."
+
 
 #: ckanext/dge_dashboard/templates/dashboard/dashboard.html:134
 msgid "Evolution of published datasets"
@@ -886,6 +890,9 @@ msgstr "Health and wellness"
 
 msgid "turismo"
 msgstr "Tourism"
+
+msgid "justicia-sociedad"
+msgstr "Justice and society"
 
 msgid "sectores"
 msgstr "Sectors"

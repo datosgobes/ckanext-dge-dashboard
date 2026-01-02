@@ -1,6 +1,6 @@
-# Copyright (C) 2022 Entidad Pública Empresarial Red.es
+# Copyright (C) 2025 Entidad Pública Empresarial Red.es
 #
-# This file is part of "dge_dashboard (datos.gob.es)".
+# This file is part of "dge-dashboard (datos.gob.es)".
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -9,7 +9,7 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
@@ -26,8 +26,8 @@ import json
 import logging
 import traceback
 from ckan.logic import check_access
-from ckanext.dge_dashboard.commands.dge_dashboard import DgeDashboardJsonCommand
-from pylons import config
+import ckanext.dge_dashboard.cli as DgeDashboardJsonCommand
+from ckan.plugins.toolkit import config
 from sqlalchemy import create_engine
 
 log = logging.getLogger(__name__)
@@ -353,11 +353,11 @@ def dge_dashboard_json_publishers(context, data_dict):
     model = context['model']
 
     sql = '''select concat('[', concat(string_agg(r.dict, ','), ']'))from
-             (select concat('{"year": "', concat(d.year_month, 
-             concat('", "harvester_publishers":', concat(d.harvester_publishers, 
-             concat(', "manual_loading_publishers":', concat(d.manual_loading_publishers,
-             concat(', "both":', concat(d.both, '}')))))))) as dict
-             from dge_dashboard_publishers d)r;'''
+            (select concat('{"year": "', concat(d.year_month, 
+            concat('", "harvester_publishers":', concat(d.harvester_publishers, 
+            concat(', "manual_loading_publishers":', concat(d.manual_loading_publishers,
+            concat(', "both":', concat(d.both, '}')))))))) as dict
+            from dge_dashboard_publishers d order by year_month)r;'''
 
     result = _execute_fetchone_sql(model, sql)
     return _write_file(result, destination, filename, None)
@@ -481,9 +481,9 @@ def dge_dashboard_json_drupal_published_contents(context, data_dict):
         data = json.loads(result)
         for row in data:
             if not "dataset_comments" in row:
-                row['dataset_comments'] = 0L
+                row['dataset_comments'] = 0
             if not "content_comments" in row:
-                row['content_comments'] = 0L
+                row['content_comments'] = 0
         result = json.dumps(data)
     return _write_file(result, destination, prefix, what)
 
@@ -559,8 +559,8 @@ def dge_dashboard_json_drupal_top10_voted_datasets(context, data_dict):
             'update_date': datetime.now().strftime('%d/%m/%Y'),
             'data': [
                 {
-                    'name': row[0] if row[0] else u'',
-                    'url': row[1] if row[1] else u'',
+                    'name': row[0] if row[0] else '',
+                    'url': row[1] if row[1] else '',
                     'likes': row[2] if row[2] else 0
                 }
                 for row in rows]
@@ -675,9 +675,6 @@ def dge_dashboard_json_current_users(context, data_dict):
                      GROUP BY vo.tid ORDER BY total_users DESC, org ASC) s1;'''
 
     result = _execute_drupal_sql(sql)
-    if result:
-        result = result.decode('latin1').encode('utf-8')
-        log.debug("FINISHED")
     return _write_file(result, destination, prefix, what)
 
 
@@ -836,10 +833,7 @@ def dge_dashboard_json_visited_datasets(context, data_dict):
                              limit 10;'''.format(p0=y_m)
 
                 elif what == 'org':
-                    '''
-                        SDA-926 - Modificada query para obtener los 10 conjuntos de datos más visitados no eliminados,
-                        es decir, que aún se encuentran en la tabla package
-                    '''
+
                     sql = '''select concat('"org_id": "', organization_id,
                              concat(concat('", "month": "', concat(s1.year_month,
                              concat('", "day": ', concat(s1.end_day,
@@ -880,8 +874,11 @@ def dge_dashboard_json_visited_datasets(context, data_dict):
                             results.append('{"order": %s, %s}' % (i, row[0]));
                             i = i + 1
 
-    string_result = "[" + ",".join(results) + "]"
-    string_result = string_result.encode('utf-8')
+    if results and len(results) > 0:
+        string_result = "[" + ",".join(results) + "]"
+    else:
+        string_result = None
+    
     return _write_file(string_result, destination, prefix, what)
 
 
@@ -940,41 +937,38 @@ def dge_dashboard_csv_visited_datasets(context, data_dict):
                                 try:
                                     outfile = open(output_file, "w")
                                     try:
-                                        print 'dge_dashboard_csv_visited_datasets - Writing csv with visited datasets to org %s ' % (
-                                            org_id)
+                                        print('dge_dashboard_csv_visited_datasets - Writing csv with visited datasets to org %s ' % (
+                                            org_id))
                                         writer = csv.writer(outfile)
                                         column_resources = '%s(%s)' % (
                                             'Resource', 'Downloads')
-                                        writer.writerow(['Month'.encode('utf-8'), 'Day'.encode('utf-8'), 'Url'.encode('utf-8'), 'Dataset'.encode(
-                                            'utf-8'), 'Private'.encode('utf-8'), 'Publisher'.encode('utf-8'), 'Visits'.encode('utf-8'), column_resources.encode('utf-8')])
+                                        writer.writerow(['Month', 'Day', 'Url', 'Dataset', 'Private', 'Publisher', 'Visits', column_resources])
                                         for month, day, name, title, private, pub, views, resources in result:
                                             writer.writerow([
                                                             (month if month is not None else ''),
                                                             (day if day is not None else ''),
                                                             name if name is not None else '',
-                                                            (title.encode(
-                                                                'utf-8') if title is not None else ''),
+                                                            (title if title is not None else ''),
                                                             (private if private is not None else ''),
-                                                            (pub.encode(
-                                                                'utf-8') if pub is not None else ''),
+                                                            (pub if pub is not None else ''),
                                                             views if views is not None else '',
-                                                            (resources.encode('utf-8') if resources is not None else '')])
-                                        print 'dge_dashboard_csv_visited_datasets - Writed csv with visited datasets to org %s data in %s' % (
-                                                org_id, output_file)
+                                                            (resources if resources is not None else '')])
+                                        print('dge_dashboard_csv_visited_datasets - Writed csv with visited datasets to org %s data in %s' % (
+                                                org_id, output_file))
                                     except Exception as e:
-                                        print 'Exception in dge_dashboard_csv_visited_datasets %s' % e
+                                        print('Exception in dge_dashboard_csv_visited_datasets %s' % e)
                                         log.error(
                                             'Exception in dge_dashboard_csv_visited_datasets %s', e)
                                         output_file = None
                                     finally:
                                         outfile.close()
                                 except Exception as e:
-                                    print 'Exception in dge_dashboard_csv_visited_datasets %s' % e
+                                    print('Exception in dge_dashboard_csv_visited_datasets %s' % e)
                                     log.error(
                                         'Exception in dge_dashboard_csv_visited_datasets %s', e)
                                     output_file = None
                     except Exception as e:
-                        print 'Exception in dge_dashboard_csv_visited_datasets %s' % e
+                        print('Exception in dge_dashboard_csv_visited_datasets %s' % e)
                         log.error(
                             'Exception in dge_dashboard_csv_visited_datasets %s', e)
 
@@ -1069,8 +1063,8 @@ def dge_dashboard_csv_published_datasets_by_root_org(context, data_dict):
                     filename = None
         else:
             filename = None
-            print 'Results:'
-            print titleRow;
+            print('Results:')
+            print(titleRow);
             for row in results:
                 print (row)
     return filename
@@ -1128,9 +1122,7 @@ def dge_dashboard_json_organization_by_administration_level(context, data_dict):
 			 group by s7.adm_level, s7.publisher, s7.title order by title)s8;'''
 
     result = _execute_fetchone_sql(model, sql)
-    string_result = result.encode('utf-8')
-
-    return _write_file(string_result, destination, filename, None)
+    return _write_file(result, destination, filename, None)
 
 
 def dge_dashboard_json_organization_name(context, data_dict):
@@ -1157,5 +1149,4 @@ def dge_dashboard_json_organization_name(context, data_dict):
              from "group" g where state='active' and type='organization')r;'''
 
     result = _execute_fetchone_sql(model, sql)
-    string_result = result.encode('utf-8')
-    return _write_file(string_result, destination, filename, None)
+    return _write_file(result, destination, filename, None)

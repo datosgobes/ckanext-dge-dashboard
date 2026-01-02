@@ -1,6 +1,6 @@
-# Copyright (C) 2022 Entidad Pública Empresarial Red.es
+# Copyright (C) 2025 Entidad Pública Empresarial Red.es
 #
-# This file is part of "dge_dashboard (datos.gob.es)".
+# This file is part of "dge-dashboard (datos.gob.es)".
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -9,7 +9,7 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
@@ -21,7 +21,7 @@ import logging
 import json
 
 from ckan.logic import check_access
-from pylons import config
+from ckan.plugins.toolkit import config
 from sqlalchemy import create_engine
 from os import path
 
@@ -135,9 +135,9 @@ def dge_dashboard_update_published_datasets(context, data_dict):
                    '''
             model.Session.execute(sql)
         else:
-            print "Results: "
+            print("Results: ")
             for row in results:
-                print row
+                print(row)
     else:
         log.debug("Getting data by num_resources ....")
         key = 'num_resources'
@@ -181,9 +181,9 @@ def dge_dashboard_update_published_datasets(context, data_dict):
                    '''
             model.Session.execute(sql)
         else:
-            print "Results: "
+            print("Results: ")
             for row in results:
-                print row
+                print(row)
 
 
 def dge_dashboard_update_publishers(context, data_dict):
@@ -274,7 +274,7 @@ def dge_dashboard_update_publishers(context, data_dict):
     result_both = json.loads(result_both[0] if result_both else 'null')
     harvester_publishers = 0
     manual_loading_publishers = 0
-    both = sum(map(lambda d: d.get('both', 0), result_both or []))
+    both = sum([d.get('both', 0) for d in result_both or []])
     log.debug("Processing the data obtained...")
     harvester_publishers_pub = []
     manual_loading_publishers_pub = []
@@ -283,29 +283,22 @@ def dge_dashboard_update_publishers(context, data_dict):
         pub = row[0]
         guid = row[1]
         harvest = row[2]
-        #log.debug( 'tratado pub %s' % pub)
         if guid == True and harvest == True:
-            #log.debug( 'pub  %s federa' % pub)
             if pub not in harvester_publishers_pub:
                 harvester_publishers_pub.append(pub)
                 harvester_publishers = harvester_publishers + 1
                 if pub in manual_loading_publishers_pub:
-                    #log.debug( 'pub %s ya estaba en manual' % pub)
                     manual_loading_publishers = manual_loading_publishers - 1
                     harvester_publishers = harvester_publishers - 1
-            #else:
-                #log.debug( 'pub %s que federa ya se habia procesado' % pub)
+
         else:
-           # log.debug( 'pub  %s manual' % pub)
             if pub not in manual_loading_publishers_pub:
                 manual_loading_publishers_pub.append(pub)
                 manual_loading_publishers = manual_loading_publishers + 1
                 if pub in harvester_publishers_pub:
-                    #log.debug( 'pub %s ya estaba en federado' % pub)
                     harvester_publishers = harvester_publishers - 1
                     manual_loading_publishers = manual_loading_publishers - 1
-            #else:
-                #log.debug( 'pub  %s manual ya se habia procesado' % pub)
+
         log.debug('harvester_publishers=%d  manual_loading_publishers=%d' % (harvester_publishers, manual_loading_publishers))
 
     results.append((import_date, harvester_publishers,
@@ -329,9 +322,9 @@ def dge_dashboard_update_publishers(context, data_dict):
                '''
         model.Session.execute(sql)
     else:
-        print "Results: "
+        print("Results: ")
         for row in results:
-            print row
+            print(row)
 
 
 def dge_dashboard_update_drupal_published_contents(context, data_dict):
@@ -393,9 +386,9 @@ def dge_dashboard_update_drupal_published_contents(context, data_dict):
                 '''
         model.Session.execute(sql)
     else:
-        print "Results: "
+        print("Results: ")
         for row in results:
-            print row
+            print(row)
 
 
 def dge_dashboard_update_drupal_comments(context, data_dict):
@@ -500,6 +493,6 @@ def dge_dashboard_update_drupal_comments(context, data_dict):
                 '''
         model.Session.execute(sql)
     else:
-        print "Results: "
+        print("Results: ")
         for row in results:
-            print row
+            print(row)
