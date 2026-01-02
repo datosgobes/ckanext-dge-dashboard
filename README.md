@@ -1,18 +1,21 @@
 # ckanext-dge-dashboard
 
-`ckanext-dge-dashboard` es una extensión para CKAN utilizada en la plataforma datos.gob.es para generar y gestionar información de *dashboard* a partir de datos de CKAN.
+`ckanext-dge-dashboard` es una extensión para CKAN utilizada en la plataforma [datos.gob.es](https://datos.gob.es/) para generar y gestionar información de *dashboard* a partir de datos de CKAN.
 
 > [!TIP]
 > Guía base y contexto del proyecto: https://github.com/datosgobes/datos.gob.es
 
-## Descripción
+## Overview
 
-- Añade un plugin CKAN para funcionalidades relacionadas con *dashboard*.
+- Añade un plugin CKAN con funcionalidades relacionadas con *dashboard*.
 - Incluye comandos *paster* para inicialización y generación de salidas (CSV/JSON).
 
-## Requisitos
+## Requirements
+
+- Una instancia de CKAN.
 
 ### Compatibilidad
+
 Compatibilidad con versiones de CKAN:
 
 | CKAN version | Compatible?                                                                 |
@@ -22,17 +25,13 @@ Compatibilidad con versiones de CKAN:
 | 2.10         | ❓ Unknown |
 | 2.11         | ❓ Unknown |
 
-### Dependencias
-
-- Una instancia de CKAN.
-
-## Instalación
+## Installation
 
 ```sh
 pip install -e .
 ```
 
-## Configuración
+## Configuration
 
 Activa el plugin en tu configuración de CKAN:
 
@@ -44,12 +43,33 @@ ckan.plugins = … dge_dashboard
 
 - `dge_dashboard`
 
-## Tests
+### CLI (`ckan`)
+
+> [!NOTE]
+> Desde CKAN 2.9, los comandos *paster* se ejecutan mediante el comando `ckan`.
+> Consulta la [documentación oficial](https://docs.ckan.org/en/2.9/maintaining/cli.html) para más detalles.
+
+Este repositorio expone los siguientes comandos:
+
+- `dge_dashboard_initdb`
+- `dge_dashboard_load`
+- `dge_dashboard_json`
+- `dge_dashboard_csv`
+
+Ejemplo de uso (ajusta el fichero `.ini` a tu entorno):
 
 ```sh
-pytest --ckan-ini=test.ini ckanext/dge_dashboard/tests
+ckan -c /etc/ckan/default/ckan.ini dge_dashboard_initdb
 ```
 
-## Licencia
+## Running the tests
 
-Este proyecto se distribuye bajo licencia **GNU Affero General Public License (AGPL) v3.0 o posterior**. Consulta el fichero [`LICENSE`](LICENSE).
+Este repositorio incluye tests; si tu entorno no dispone de `test.ini`, puedes ejecutar directamente el paquete de tests:
+
+```sh
+pytest ckanext/dge_dashboard/tests
+```
+
+## License
+
+Este proyecto se distribuye bajo licencia **GNU Affero General Public License (AGPL) v3.0 o posterior**. Consulta el fichero [LICENSE](LICENSE).
