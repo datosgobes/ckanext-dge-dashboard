@@ -1,4 +1,4 @@
-# Copyright (C) 2025 Entidad Pública Empresarial Red.es
+# Copyright (C) 2026 Entidad Pública Empresarial Red.es
 #
 # This file is part of "dge-dashboard (datos.gob.es)".
 #
@@ -353,12 +353,25 @@ def dge_dashboard_update_drupal_published_contents(context, data_dict):
 
     results = []
     log.debug("Getting total data from app, success, intiative and request ....")
-    # total active, public dataset pusblished before than {p0} date
-    sql = '''SELECT Count(*) As num, n.type As type FROM node n WHERE 
-             n.status = 1 AND n.language = 'es' AND
-             (n.type like 'app' OR n.type like 'success' OR n.type like 'initiative' OR n.type like 'request') AND
-             FROM_UNIXTIME(n.created) < DATE_FORMAT(CURRENT_DATE, '{p0}')
-             GROUP BY type;'''.format(p0=date)
+    # total active, public apps, initiatives, companies and data requests pusblished before than {p0} date
+    sql = '''select count(distinct n.nid) as num,
+            case n.type
+                when 'aplicacion' then 'app'
+                when 'empresa_reutilizadora' then 'success'
+                when 'iniciativa' then 'initiative'
+                when 'peticion_de_datos' then 'request'
+            end as type
+            from node n
+            join node_field_data nfd on n.nid = nfd.nid and nfd.status = 1 and nfd.langcode = 'es'
+            and (n.type like 'aplicacion' OR n.type like 'empresa_reutilizadora' OR n.type like 'iniciativa' OR n.type like 'peticion_de_datos')
+            and FROM_UNIXTIME(nfd.created) < DATE_FORMAT(CURRENT_DATE, '{p0}')
+            GROUP BY
+            case n.type
+                when 'aplicacion' then 'app'
+                when 'empresa_reutilizadora' then 'success'
+                when 'iniciativa' then 'initiative'
+                when 'peticion_de_datos' then 'request'
+            end;'''.format(p0=date)
     result = engine.execute(sql)
     for row in result:
         results.append((import_date, row[1], 'total', '', row[0]))
@@ -417,58 +430,53 @@ def dge_dashboard_update_drupal_comments(context, data_dict):
     engine = create_engine(config.get('ckanext.dge_drupal_users.connection', None))
 
     results = []
-    log.debug("Getting total comments ....")
-    sql = '''SELECT COUNT(c.cid) As comentarios FROM comment c, node n WHERE
-             c.nid = n.nid AND n.type != 'dataset' AND
-             YEAR(FROM_UNIXTIME(c.created)) = YEAR('{p0}' - INTERVAL 1 MONTH) AND
-             MONTH(FROM_UNIXTIME(c.created)) = MONTH('{p0}' - INTERVAL 1 MONTH);'''.format(p0=date)
+    log.debug("Getting total comments on drupal....")
+    sql = '''select count(distinct c.cid) as comentarios from comment c
+            join comment_field_data cfd on c.cid = cfd.cid
+            where YEAR(FROM_UNIXTIME(cfd.created)) = YEAR('{p0}' - INTERVAL 1 MONTH)
+            and MONTH(FROM_UNIXTIME(cfd.created)) = MONTH('{p0}' - INTERVAL 1 MONTH);'''.format(p0=date)
     result = engine.execute(sql)
     for row in result:
         results.append((import_date, 'content_comments', 'total', '', row[0]))
 
-    sql = '''SELECT COUNT(c.cid) As comentarios FROM comment c, node n WHERE
-             c.nid = n.nid AND n.type = 'dataset' AND
-             YEAR(FROM_UNIXTIME(c.created)) = YEAR('{p0}' - INTERVAL 1 MONTH) AND
-             MONTH(FROM_UNIXTIME(c.created)) = MONTH('{p0}' - INTERVAL 1 MONTH);'''.format(p0=date)
-    result = engine.execute(sql)
+    log.debug("Getting total comments on ckan....")
+    sql = '''select count(distinct cc.id) as comentarios from public.comments_comments cc
+            join public.comments_threads ct on ct.id = cc.thread_id
+            join public.package p on p.id = ct.subject_id and p.state = 'active' and p.type in ('dataset', 'dataservice')
+            where cc.created_at >= DATE '{p0}' - INTERVAL '1 month'
+            and cc.created_at < DATE '{p0}';'''.format(p0=date)
+    result = model.Session.execute(sql)
     for row in result:
         results.append((import_date, 'dataset_comments', 'total', '', row[0]))
 
-    log.debug("Getting comments by organization ....")
-    # getting the drupal equivalence between organizations
-    orgs = dict()
-    sql = '''SELECT fo.entity_id tid, fc.field_ckan_organization_id_value ckan_id FROM
-             field_data_field_c_id_ud_organica fo, field_data_field_ckan_organization_id fc
-             WHERE fo.entity_id = fc.entity_id;'''
-    result = engine.execute(sql)
-    for row in result:
-        orgs[row[0]] = row[1]
-
-    sql = '''SELECT ra.field_root_agency_tid As agency, COUNT(c.cid) As comentarios
-             FROM comment c, node n, node_type ntp, users u, profile p,
-             field_data_field_root_agency ra WHERE c.nid = n.nid AND
-             ntp.type = n.type AND n.type != 'dataset' AND u.uid = n.uid AND
-             p.uid = u.uid AND p.type = 'agency_data' AND p.pid = ra.entity_id AND
-             YEAR(FROM_UNIXTIME(c.created)) = YEAR('{p0}' - INTERVAL 1 MONTH) AND
-             MONTH(FROM_UNIXTIME(c.created)) = MONTH('{p0}' - INTERVAL 1 MONTH)
-             GROUP BY agency ORDER BY agency;'''.format(p0=date)
+    log.debug("Getting drupal comments by organization ....")
+    sql = '''select t.field_ckan_organization_id_value, COUNT(*)
+            from comment c
+            join comment_field_data cfd on c.cid = cfd.cid
+            join node_field_data n on n.nid = cfd.entity_id
+            left join node__field_organismo_responsable norg on norg.entity_id = n.nid
+            left join taxonomy_term__field_ckan_organization_id t on t.entity_id = norg.field_organismo_responsable_target_id
+            where YEAR(FROM_UNIXTIME(cfd.created)) = YEAR('{p0}' - INTERVAL 1 MONTH)
+            and MONTH(FROM_UNIXTIME(cfd.created)) = MONTH('{p0}' - INTERVAL 1 MONTH)
+            group by t.field_ckan_organization_id_value;'''.format(p0=date)
     result = engine.execute(sql)
     for row in result:
         if row[0]:
-            results.append((import_date, 'content_comments', 'org', orgs[row[0]], row[1]))
+            results.append((import_date, 'content_comments', 'org', row[0], row[1]))
 
-    sql = '''SELECT ra.field_root_agency_tid As agency, COUNT(c.cid) As comentarios
-             FROM comment c, node n, node_type ntp, users u, profile p,
-             field_data_field_root_agency ra WHERE c.nid = n.nid AND
-             ntp.type = n.type AND n.type = 'dataset' AND u.uid = n.uid AND
-             p.uid = u.uid AND p.type = 'agency_data' AND p.pid = ra.entity_id AND
-             YEAR(FROM_UNIXTIME(c.created)) = YEAR('{p0}' - INTERVAL 1 MONTH) AND
-             MONTH(FROM_UNIXTIME(c.created)) = MONTH('{p0}' - INTERVAL 1 MONTH)
-             GROUP BY agency ORDER BY agency;'''.format(p0=date)
-    result = engine.execute(sql)
+    log.debug("Getting datasets comments by organization ....")
+    sql = '''select p.owner_org, count(*) as comentarios
+            from public.comments_comments cc
+            join public.comments_threads ct on ct.id = cc.thread_id
+            join public.package p on p.id = ct.subject_id and p.state = 'active' and p.type in ('dataset', 'dataservice')
+            where cc.created_at >= DATE '{p0}' - INTERVAL '1 month'
+            and cc.created_at < DATE '{p0}'
+            group by p.owner_org
+            order by comentarios desc, owner_org;'''.format(p0=date)
+    result = model.Session.execute(sql)
     for row in result:
         if row[0]:
-            results.append((import_date, 'dataset_comments', 'org', orgs[row[0]], row[1]))
+            results.append((import_date, 'dataset_comments', 'org', row[0], row[1]))
 
     if save:
         # check if there are saved data from this {p0} date
